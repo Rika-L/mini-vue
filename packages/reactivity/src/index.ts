@@ -1,3 +1,3 @@
-import { isObject } from "@vue/shared";
+import { isObject } from '@vue/shared'
 
-console.log(isObject({})); // true
+console.log(isObject({})) // true
