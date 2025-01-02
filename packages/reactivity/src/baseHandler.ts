@@ -1,5 +1,5 @@
 import { activeEffect } from './effect'
-import { track } from './reactiveEffect'
+import { track, trigger } from './reactiveEffect'
 
 export enum ReactiveFlags {
   IS_REACTIVE = '__v_isReactive',
@@ -19,9 +19,15 @@ export const mutableHandlers: ProxyHandler<any> = {
   },
   set(target, key, value, recevier) {
     // 找到属性让对应的effect重新执行
-
     // TODO: 触发更新
-    Reflect.set(target, key, value, recevier)
-    return true
+    const oldValue = target[key]
+    const result = Reflect.set(target, key, value, recevier)
+
+    if (oldValue !== value) {
+      // 需要触发页面更新
+      trigger(target, key, value, oldValue)
+    }
+
+    return result
   },
 }
