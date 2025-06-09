@@ -11,7 +11,6 @@ const targetMap = new WeakMap(); // 存放依赖收集的关系
 export function track(target, key) {
   // activeEffect 有这个说明实在effect中访问的 没有说明在effect之外进行访问 不需要进行收集
   if (activeEffect) {
-    console.log(key, activeEffect);
 
     let depsMap = targetMap.get(target);
     if (!depsMap) {
@@ -24,7 +23,6 @@ export function track(target, key) {
     }
   trackEffect(activeEffect, dep) // 将当前的effect放入到dep中 后续可以根据值的变化触发此dep中存放的effect
 
-  console.log(targetMap);
   }
 }
 
