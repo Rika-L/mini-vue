@@ -8,12 +8,12 @@ export function effect(fn, options?) {
   });
   _effect.run();
 
-  if(options) {
-    Object.assign(_effect, options)
+  if (options) {
+    Object.assign(_effect, options);
   }
 
-  const runner = _effect.run.bind(_effect)
-  runner.effect = _effect // 可以在run方法上获取到effect的引用
+  const runner = _effect.run.bind(_effect);
+  runner.effect = _effect; // 可以在run方法上获取到effect的引用
   return runner; // 外界可以调用run
 }
 
@@ -37,6 +37,7 @@ class ReactiveEffect {
   _trackId = 0; // 用于记录当前effect执行了几次
   deps = [];
   _depsLength = 0;
+  _running = 0;
   public active = true; // 创建的effect是响应式的
   // fn是用户编写的函数
   // 如果fn中以来的数据发生变化后 需要重新调用 -> run()
@@ -57,8 +58,10 @@ class ReactiveEffect {
 
       preCleanEffect(this);
 
+      this._running++;
       return this.fn(); // 依赖收集
     } finally {
+      this._running--;
       postCleanEffect(this);
       activeEffect = lastEffect;
     }
@@ -105,8 +108,10 @@ export function trackEffect(effect, dep) {
 
 export function triggerEffects(dep) {
   for (const effect of dep.keys()) {
-    if (effect.scheduler) {
-      effect.scheduler();
+    if (!effect._running) { // 如果不是正在执行 才能执行
+      if (effect.scheduler) {
+        effect.scheduler();
+      }
     }
   }
 }
