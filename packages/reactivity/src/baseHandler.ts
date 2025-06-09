@@ -1,5 +1,6 @@
-import { activeEffect } from "./effect";
+import { isObject } from "@vue/shared";
 import { track, trigger } from "./reactiveEffect";
+import { reactive } from "./reactive";
 
 export enum ReactiveFlags {
   IS_REACTIVE = "__v_isReactive",
@@ -17,7 +18,13 @@ export const mutableHandlers: ProxyHandler<any> = {
 
     track(target, key); // 收集这个对象上的这个属性 和effect关联在一起
 
-    return Reflect.get(target, key, recevier);
+    let res = Reflect.get(target, key, recevier);
+
+    if(isObject(res)){ // 递归代理
+      return reactive(res)
+    }
+
+    return res
   },
   set(target, key, value, recevier) {
     // 找到属性 让对应的effect重新执行
