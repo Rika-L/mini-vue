@@ -85,7 +85,6 @@ function cleanDepEffect(dep, effect) {
 // 双向记忆
 export function trackEffect(effect, dep) {
   // 需要重新去收集依赖 将不需要的移除
-
   if (dep.get(effect) !== effect._trackId) {
     dep.set(effect, effect._trackId); // 更新id
 
