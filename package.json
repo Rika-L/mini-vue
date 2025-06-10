@@ -6,7 +6,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "node scripts/dev.js reactivity -f esm",
+    "dev": "node scripts/dev.js runtime-dom -f esm",
     "test": "vitest",
     "test:ui": "vitest --ui"
   },
@@ -25,5 +25,9 @@
     "minimist": "^1.2.8",
     "typescript": "^5.8.3",
     "vitest": "^3.2.2"
+  },
+  "dependencies": {
+    "@vue/reactivity": "^3.5.16",
+    "@vue/shared": "^3.5.16"
   }
 }
