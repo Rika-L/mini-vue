@@ -12,7 +12,7 @@ describe("api: watch", () => {
     expect(dummy).toBe(1);
   });
 
-  it('should handle ref', () => {
+  it("should handle ref", () => {
     const state = ref(0);
     let dummy = 0;
     watch(state, (newValue) => {
@@ -23,27 +23,34 @@ describe("api: watch", () => {
     expect(dummy).toBe(1);
   });
 
-  it('should handle function', () => {
+  it("should handle function", () => {
     const state = reactive({ count: 0 });
     let dummy = 0;
-    watch(() => state.count, (newValue) => {
-      dummy = newValue;
-    });
+    watch(
+      () => state.count,
+      (newValue) => {
+        dummy = newValue;
+      }
+    );
     expect(dummy).toBe(0);
     state.count++;
     expect(dummy).toBe(1);
   });
 
-  it('show handle immediate option', () => {
+  it("show handle immediate option", () => {
     const state = reactive({ count: 0 });
     let dummy = -1;
-    watch(state, (newValue) => {
-      dummy = newValue.count;
-    }, { immediate: true });
+    watch(
+      state,
+      (newValue) => {
+        dummy = newValue.count;
+      },
+      { immediate: true }
+    );
     expect(dummy).toBe(0);
   });
 
-  it('watchEffect', () => {
+  it("watchEffect", () => {
     const state = reactive({ count: 0 });
     let dummy = 0;
     watchEffect(() => {
@@ -52,5 +59,19 @@ describe("api: watch", () => {
     expect(dummy).toBe(0);
     state.count++;
     expect(dummy).toBe(1);
+  });
+
+  it("stopping the watcher (effect)", () => {
+    const state = reactive({ count: 0 });
+    let dummy;
+    const stop: any = watchEffect(() => {
+      dummy = state.count;
+    });
+    expect(dummy).toBe(0);
+
+    stop();
+    state.count++;
+    // should not update
+    expect(dummy).toBe(0);
   });
 });

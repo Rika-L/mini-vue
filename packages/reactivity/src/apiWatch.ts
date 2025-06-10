@@ -45,15 +45,31 @@ function doWatch(source, cb, { deep, immediate } = {} as any) {
     getter = () => reactiveGetter(source);
   } else if (isRef(source)) {
     getter = () => source.value;
+  
+
   } else if (isFunction(source)) {
     getter = source;
   }
   let oldValue;
 
+  let clean
+
+  const onCleanup = (fn) => {
+    clean = () => {
+      fn()
+      clean = undefined
+    }
+  }
+
   const job = () => {
     if (cb) {
       const newValue = effect.run();
-      cb(newValue, oldValue);
+      cb(newValue, oldValue, onCleanup);
+    
+      if (clean) {
+        clean() // 在执行回调前先调用上一次的清理操作 进行清理
+      }
+
       oldValue = newValue;
     }else{
       effect.run();
@@ -73,4 +89,10 @@ function doWatch(source, cb, { deep, immediate } = {} as any) {
     // watchEffect
     effect.run(); // 直接执行即可
   }
+
+  const unwatch = () => {
+    effect.stop()
+  }
+
+  return unwatch
 }
