@@ -1,10 +1,8 @@
 import { isObject } from "@vue/shared";
 import { track, trigger } from "./reactiveEffect";
 import { reactive } from "./reactive";
+import { ReactiveFlags } from "./constants";
 
-export enum ReactiveFlags {
-  IS_REACTIVE = "__v_isReactive",
-}
 
 // proxy 需要搭配 reflect 来使用
 export const mutableHandlers: ProxyHandler<any> = {
