@@ -3,6 +3,9 @@ import path from "node:path";
 export default defineConfig({
   test: {
     globals: true,
+    environmentMatchGlobs: [
+      ['packages/{vue,vue-compat,runtime-dom}/**', 'jsdom'],
+    ],
   }, 
   resolve:{
     alias: [
