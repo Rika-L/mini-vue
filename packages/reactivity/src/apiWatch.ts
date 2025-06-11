@@ -34,7 +34,6 @@ function traverse(source, depth, currentDepth = 0, seen = new Set()) {
 }
 
 function doWatch(source, cb, { deep, immediate } = {} as any) {
-  console.log(isFunction(source));
   // source => getter?
   // 产生一个可以给ReactiveEffect来使用的getter 需要对这个对象进行取值操作 会关联当前的reactiveEffect
   const reactiveGetter = (source) =>
