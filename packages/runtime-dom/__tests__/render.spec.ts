@@ -1,10 +1,11 @@
-import { h } from "../../../public/vue.esm-browser.js";
+import { h } from "@vue/runtime-core";
 import { render } from "@vue/runtime-dom";
 
 describe("runtime-core: render", () => {
   it("happy path", () => {
     const vnode = h("div", {}, "hi");
     const container = document.createElement("div");
+    console.log(vnode)
     render(vnode, container);
     expect(container.innerHTML).toBe("<div>hi</div>");
   });
