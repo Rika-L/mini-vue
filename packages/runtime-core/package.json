@@ -1,10 +1,10 @@
 {
-  "name": "@vue/runtime-dom",
+  "name": "@vue/runtime-core",
   "version": "1.0.0",
-  "module": "dist/runtime-dom.esm-bundle.js",
-  "unpkg": "dist/runtime-dom.global.js",
+  "module": "dist/runtime-core.esm-bundle.js",
+  "unpkg": "dist/runtime-core.global.js",
   "buildOptions": {
-    "name": "RuntimeDOM",
+    "name": "RuntimeCore",
     "formats": [
       "esm-bundler",
       "esm-browser",
@@ -13,7 +13,7 @@
     ]
   },
   "dependencies": {
-    "@vue/runtime-dom": "workspace:*",
+    "@vue/reactivity": "workspace:*",
     "@vue/shared": "workspace:*"
   }
 }
