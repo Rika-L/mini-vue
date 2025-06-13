@@ -39,14 +39,14 @@ export function createRenderer(renderOptions) {
     hostInsert(el, container);
   };
 
-  const processElement = (n1,n2, container) => {
+  const processElement = (n1, n2, container) => {
     if (n1 === null) {
       // 初始化操作
       mountElement(n2, container);
     } else {
       patchElement(n1, n2, container);
     }
-  }
+  };
 
   const patchProps = (oldProps, newProps, el) => {
     // 新的要全部生效
@@ -59,22 +59,59 @@ export function createRenderer(renderOptions) {
         hostPatchProp(el, key, oldProps[key], null);
       }
     }
-  }
+  };
 
-  const patchChildren = (n1, n2, container) => {
+  const unmountChildren = (children) => {
+    for (let i = 0; i < children.length; i++) {
+      unmount(children[i]);
+    }
+  };
 
-  }
+  const patchChildren = (n1, n2, el) => {
+    // text array null
+    const c1 = n1.children;
+    const c2 = n2.children;
+
+    const prevShapeFlag = n1.shapeFlag;
+    const shapeFlag = n2.shapeFlag;
+
+    if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
+      if (prevShapeFlag & ShapeFlags.ARRAY_CHILDREN) {
+        // 新的是文本 老的是数组 移除老的
+        unmountChildren(c1);
+      }
+      if (c1 !== c2) {
+        hostSetElementText(el, c2);
+      }
+    }else {
+      if(prevShapeFlag & ShapeFlags.ARRAY_CHILDREN) {
+        if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
+          // 全量diff 算法 两个数组比对
+        }else {
+          unmountChildren(c1)
+        }
+      }else{
+        if(prevShapeFlag & ShapeFlags.TEXT_CHILDREN) {
+          hostSetElementText(el, "");
+        }
+
+        if(shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
+          mountChildren(c2, el);
+        }
+      }
+    }
+  };
 
   const patchElement = (n1, n2, container) => {
     // 1.比较元素的差异 肯定需要复用dom元素
     // 2.比较属性的差异
-    let el =  n2.el = n1.el // 对dom元素的复用
+    let el = (n2.el = n1.el); // 对dom元素的复用
 
-    let oldProps = n1.props || {}
-    let newProps = n2.props || {}
-    patchProps(oldProps, newProps, el)
+    let oldProps = n1.props || {};
+    let newProps = n2.props || {};
+    patchProps(oldProps, newProps, el);
 
-    patchChildren(n1, n2, container)
+    patchChildren(n1, n2, el);
   };
 
   // 渲染走这里，更新也走这里

@@ -38,7 +38,6 @@ describe("runtime-core: render", () => {
     const vnode2 = h("div", { style: { color: "blue" } });
     const container = document.createElement("div");
     render(vnode1, container);
-    console.log(container.children)
     expect(container.innerHTML).toBe('<div style="color: red;"></div>');
     render(vnode2, container);
     expect(container.innerHTML).toBe('<div style="color: blue;"></div>');
@@ -54,13 +53,93 @@ describe("runtime-core: render", () => {
     expect(container.innerHTML).toBe('<div></div>');
   });
 
-  it.skip('should update children', () => {
-    const vnode1 = h("div", [h("p", "hello")]);
+  it('should update children (text to text)', () => {
+    const vnode1 = h("div", "hello");
+    const vnode2 = h("div", "world");
+    const container = document.createElement("div");
+    render(vnode1, container);
+    expect(container.innerHTML).toBe('<div>hello</div>');
+    render(vnode2, container);
+    expect(container.innerHTML).toBe('<div>world</div>');
+  });
+
+  it('should update children (text to null)', () => {
+    const vnode1 = h("div", "hello");
+    const vnode2 = h("div");
+    const container = document.createElement("div");
+    render(vnode1, container);
+    expect(container.innerHTML).toBe('<div>hello</div>');
+    render(vnode2, container);
+    expect(container.innerHTML).toBe('<div></div>');
+  });
+
+  it('should update children (text to array)', () => {
+    const vnode1 = h("div", "hello");
     const vnode2 = h("div", [h("p", "world")]);
     const container = document.createElement("div");
     render(vnode1, container);
-    expect(container.innerHTML).toBe('<div><p>hello</p></div>');
+    expect(container.innerHTML).toBe('<div>hello</div>');
     render(vnode2, container);
     expect(container.innerHTML).toBe('<div><p>world</p></div>');
+  });
+
+  it.skip('should update children (array to array)', () => {
+    const vnode1 = h("div", [h("p", "hello"), h("p", "world")]);
+    const vnode2 = h("div", [h("p", "hello"), h("p", "diff")]);
+    const container = document.createElement("div");
+    render(vnode1, container);
+    expect(container.innerHTML).toBe('<div><p>hello</p><p>world</p></div>');
+    render(vnode2, container);
+    expect(container.innerHTML).toBe('<div><p>hello</p><p>diff</p></div>');
+  });
+
+  it('should update children (array to text)', () => {
+    const vnode1 = h("div", [h("p", "hello"), h("p", "world")]);
+    const vnode2 = h("div", "hello");
+    const container = document.createElement("div");
+    render(vnode1, container);
+    expect(container.innerHTML).toBe('<div><p>hello</p><p>world</p></div>');
+    render(vnode2, container);
+    expect(container.innerHTML).toBe('<div>hello</div>');
+  });
+
+  it('should update children(array to null)',()=>{
+    const vnode1 = h("div", [h("p", "hello"), h("p", "world")]);
+    const vnode2 = h("div");
+    const container = document.createElement("div");
+    render(vnode1, container);
+    expect(container.innerHTML).toBe('<div><p>hello</p><p>world</p></div>');
+    render(vnode2, container);
+    expect(container.innerHTML).toBe('<div></div>');
+  })
+
+  it('should update children(null to array)', () => {
+    const vnode1 = h("div");
+    const vnode2 = h("div", [h("p", "hello"), h("p", "world")]);
+    const container = document.createElement("div");
+    render(vnode1, container);
+    expect(container.innerHTML).toBe('<div></div>');
+    render(vnode2, container);
+    expect(container.innerHTML).toBe('<div><p>hello</p><p>world</p></div>');
+  });
+
+  it('should update children(null to text)', () => {
+    const vnode1 = h("div");
+    const vnode2 = h("div", "hello");
+    const container = document.createElement("div");
+    render(vnode1, container);
+    expect(container.innerHTML).toBe('<div></div>');
+    render(vnode2, container);
+    expect(container.innerHTML).toBe('<div>hello</div>');
+  });
+
+  it('should update children(null to null)', () => {
+    const vnode1 = h("div");
+    const vnode2 = h("div");
+    const container = document.createElement("div");
+    render(vnode1, container);
+    expect(container.innerHTML).toBe('<div></div>');
+    render(vnode2, container);
+    expect(container.innerHTML).toBe('<div></div>');
   });
 });
