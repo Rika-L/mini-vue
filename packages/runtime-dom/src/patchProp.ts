@@ -6,7 +6,7 @@ import patchEvent from "./modules/patchEvent";
 import patchStyle from "./modules/patchStyle";
 
 // 只处理下面四种 class style event 普通属性
-export default function patchProps(el, key, prevValue, nextValue) {
+export default function patchProp(el, key, prevValue, nextValue) {
   if (key === "class") {
     return patchClass(el, nextValue);
   } else if (key === "style") {

@@ -23,18 +23,18 @@ export function h(type, propsOrChildren?, children?) {
       if (isVnode(propsOrChildren)) {
         // h("div", h("a"))
         return createVnode(type, null, [propsOrChildren]);
-      }else{
+      } else {
         // 属性
-        return createVnode(type, propsOrChildren)
+        return createVnode(type, propsOrChildren);
       }
     }
-    return createVnode(type, null, propsOrChildren)
+    return createVnode(type, null, propsOrChildren);
   } else {
     if (l > 3) {
-      children = Array.from(arguments).slice(2)
+      children = Array.from(arguments).slice(2);
     }
-    if(l === 3 && isVnode(children)){
-      children = [children]
+    if (l === 3 && isVnode(children)) {
+      children = [children];
     }
     // == 3 | == 1
 
@@ -42,7 +42,10 @@ export function h(type, propsOrChildren?, children?) {
   }
 }
 
-function isVnode(value) {
+export function isVnode(value) {
   return value?.__v_isVnode;
 }
 
+export function isSameVnode(n1, n2) {
+  return n1.type === n2.type && n1.key === n2.key;
+}
