@@ -1,7 +1,7 @@
 // h具有多种重载
 
 import { isObject } from "@vue/shared";
-import { createVnode } from "./createVnode";
+import { createVnode, isVnode } from "./createVnode";
 
 // 参数可以有 1(类型),2(类型,属性/儿子),3(标准的) 或 更多个(从第三个开始都是儿子)
 // h(类型, 属性, 儿子)
@@ -42,10 +42,4 @@ export function h(type, propsOrChildren?, children?) {
   }
 }
 
-export function isVnode(value) {
-  return value?.__v_isVnode;
-}
 
-export function isSameVnode(n1, n2) {
-  return n1.type === n2.type && n1.key === n2.key;
-}

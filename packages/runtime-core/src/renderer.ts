@@ -1,5 +1,6 @@
 import { ShapeFlags } from "@vue/shared";
-import { isSameVnode } from "./h";
+import { createVnode, isSameVnode, Text } from "./createVnode";
+import getSequence from "./seq";
 
 export function createRenderer(renderOptions) {
   const {
@@ -14,14 +15,31 @@ export function createRenderer(renderOptions) {
     patchProp: hostPatchProp,
   } = renderOptions;
 
+    // 标准化
+    const normalize = (children) => {
+    if (Array.isArray(children)) {
+      for (let i = 0; i < children.length; i++) {
+        if (
+          typeof children[i] === "string" ||
+          typeof children[i] === "number"
+        ) {
+          children[i] = createVnode(Text, null, String(children[i]));
+        }
+      }
+    }
+
+    return children;
+  };
+
   const mountChildren = (children, container) => {
+    children = normalize(children);
     for (let i = 0; i < children.length; i++) {
       // children[i]可能是纯文本 此时会出bug，暂不考虑
       patch(null, children[i], container);
     }
   };
 
-  const mountElement = (vnode, container,anchor) => {
+  const mountElement = (vnode, container, anchor) => {
     const { type, children, props, shapeFlag } = vnode;
     // 第一次渲染的时候让虚拟节点和真实dom创建管理
     // 第二次渲染新的vnode 可以和上一次的vnode做比对 之后更新el元素可以后续再复用这个dom
@@ -39,7 +57,7 @@ export function createRenderer(renderOptions) {
     hostInsert(el, container, anchor);
   };
 
-  const processElement = (n1, n2, container,anchor) => {
+  const processElement = (n1, n2, container, anchor) => {
     if (n1 === null) {
       // 初始化操作
       mountElement(n2, container, anchor);
@@ -67,6 +85,7 @@ export function createRenderer(renderOptions) {
     }
   };
 
+  // vue3中分为两种diff 全量diff（递归diff） 和 靶向更新 （基于模板编译）
   const patchKeyedChildren = (c1, c2, el) => {
     // 比较两个儿子的差异来更新el
     // [a,b,c,e,f,d]
@@ -118,14 +137,16 @@ export function createRenderer(renderOptions) {
 
     // a b
     // c a b --> i = 0 e1 = -1 e2 = 0 --> i > e1 && i <= e2 // 新的多老的少
-    if(i > e1) { // 新的多
-      if(i <= e2){ // 有插入的部分
+    if (i > e1) {
+      // 新的多
+      if (i <= e2) {
+        // 有插入的部分
         // insert
-        let nextPos = e2 + 1 // 看一下当前下一个元素是存在
-        let anchor = c2[nextPos]?.el
-        while(i <= e2){
-          patch(null, c2[i], el, anchor)
-          i++
+        let nextPos = e2 + 1; // 看一下当前下一个元素是存在
+        let anchor = c2[nextPos]?.el;
+        while (i <= e2) {
+          patch(null, c2[i], el, anchor);
+          i++;
         }
       }
     }
@@ -134,62 +155,74 @@ export function createRenderer(renderOptions) {
 
     // c,a,b
     // a,b --> i = 0 e1 = 1 e2 = -1 --> i > e2 && i <= e1
-    else if(i> e2){
-      if(i <= e1){
+    else if (i > e2) {
+      if (i <= e1) {
         // remove
-        while(i <= e1){
-          unmount(c1[i])
-          i++
+        while (i <= e1) {
+          unmount(c1[i]);
+          i++;
         }
       }
-    }
+    } else {
+      // 以上确认不变化的节点 并且对插入和删除做了处理
 
-    // 以上确认不变化的节点 并且对插入和删除做了处理
+      // 后面就是特殊的比对方法
+      const s1 = i;
+      const s2 = i;
 
-    // 后面就是特殊的比对方法
-    const s1 = i
-    const s2 = i
+      const keyToNewIndexMap = new Map(); // 用于快速查找 看老的是否在新的里面 没有就删除 有的就更新
 
-    const keyToNewIndexMap = new Map() // 用于快速查找 看老的是否在新的里面 没有就删除 有的就更新
+      // 根据新的节点找到对应老的位置
+      let toBePatched = e2 - s2 + 1; // 要倒序插入的个数
+      let newIndexToOldMapIndex = new Array(toBePatched).fill(0); // 用于记录新的节点在老的里面的位置
 
-    for(let i = s2; i <= e2; i++){
-      const vnode = c2[i]
-      keyToNewIndexMap.set(vnode.key, i)
-    }
-
-    for(let i = s1; i <= e1; i++){
-      const vnode = c1[i]
-      const newIndex = keyToNewIndexMap.get(vnode.key)
-      console.log(newIndex)
-      if(!newIndex){ // 如果新的里面找不到
-        // 删掉老的
-        unmount(vnode)
-      }else{ // 找到了
-        // 比较前后节点的差异 更新属性和儿子
-        patch(vnode,c2[newIndex],el)
+      for (let i = s2; i <= e2; i++) {
+        const vnode = c2[i];
+        keyToNewIndexMap.set(vnode.key, i);
       }
-    }
+
+      for (let i = s1; i <= e1; i++) {
+        const vnode = c1[i];
+        const newIndex = keyToNewIndexMap.get(vnode.key);
+        if (!newIndex) {
+          // 如果新的里面找不到
+          // 删掉老的
+          unmount(vnode);
+        } else {
+          // 找到了
+          // 比较前后节点的差异 更新属性和儿子
+          newIndexToOldMapIndex[newIndex - s2] = i + 1; // 比完以后 + 1    0 意味着以前就不存在 消除歧义
+          patch(vnode, c2[newIndex], el);
+        }
+      }
 
       // 调整顺序
       // 可以按照新的队列 倒序插入 通过参照物往前插
-      
+
       // 插入的过程中可能新的元素变多 需要创建
 
-      let toBePatched = e2 - s2 + 1; // 要倒序插入的个数
+      let inCreasingSeq = getSequence(newIndexToOldMapIndex);
 
       // 先从索引为3的位置倒叙插入
-      for(let i = toBePatched - 1; i >=0; i--){
-        let newIndex = s2 + i // h 对应的索引 找他的下一个元素作为参照物来进行插入
-        const anchor = c2[newIndex + 1]?.el
-        let vnode= c2[newIndex]
-        
-        if(!vnode.el){
+      let j = inCreasingSeq.length - 1; // 索引
+      for (let i = toBePatched - 1; i >= 0; i--) {
+        let newIndex = s2 + i; // h 对应的索引 找他的下一个元素作为参照物来进行插入
+        const anchor = c2[newIndex + 1]?.el;
+        let vnode = c2[newIndex];
+
+        if (!vnode.el) {
           // 新增的元素
-          patch(null, vnode, el, anchor) // 创建h插入
-        }else{
-          hostInsert(vnode.el, el, anchor) // 接着倒叙插入
+          patch(null, vnode, el, anchor); // 创建h插入
+        } else {
+          if (i == inCreasingSeq[j]) {
+            // 如果索引相同 跳过
+            j--;
+          } else {
+            hostInsert(vnode.el, el, anchor); // 接着倒叙插入
+          }
         }
       }
+    }
   };
 
   const patchChildren = (n1, n2, el) => {
@@ -240,8 +273,21 @@ export function createRenderer(renderOptions) {
     patchChildren(n1, n2, el);
   };
 
+  const processText = (n1, n2, container) => {
+    if (n1 == null) {
+      // 虚拟节点要关联真实节点
+      // 将节点插入到页面中
+      hostInsert(n2.el = hostCreateText(n2.children),container);
+    } else {
+      const el = (n2.el = n1.el);
+      if(n1.children !== n2.children) {
+        hostSetText(el, n2.children);
+      }
+    }
+  };
+
   // 渲染走这里，更新也走这里
-  const patch = (n1, n2, container,anchor = null) => {
+  const patch = (n1, n2, container, anchor = null) => {
     if (n1 === n2) return; // 两次渲染同一个元素，直接跳过即可
 
     // 不是相同节点
@@ -252,8 +298,14 @@ export function createRenderer(renderOptions) {
       // 直接移除老dom元素
     }
 
-    // n1.shapeFlag
-    processElement(n1, n2, container, anchor); // 对元素处理
+    const { type } = n2;
+    switch (type) {
+      case Text:
+        processText(n1, n2, container);
+        break;
+      default:
+        processElement(n1, n2, container, anchor); // 对元素处理
+    }
   };
 
   const unmount = (vnode) => {

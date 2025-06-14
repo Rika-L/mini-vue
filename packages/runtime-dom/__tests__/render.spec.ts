@@ -1,4 +1,4 @@
-import { h } from "@vue/runtime-core";
+import { h, Text } from "@vue/runtime-core";
 import { render } from "@vue/runtime-dom";
 // import {render,h} from '../../../public/vue.esm-browser.js'
 
@@ -233,6 +233,31 @@ describe("runtime-core: render", () => {
     expect(container.innerHTML).toBe('<h1><div key="a">a</div><div key="b">b</div><div key="c">c</div><div key="d">d</div><div key="e">e</div><div key="f">f</div><div key="g">g</div></h1>');
     render(vnode2, container)
     expect(container.innerHTML).toBe('<h1><div key="a">a</div><div key="b">b</div><div key="e">e</div><div key="c">c</div><div key="d">d</div><div key="h">h</div><div key="f">f</div><div key="g">g</div></h1>');
-    
+  });
+
+  it('should render Text', () => {
+    const vnode = h(Text, 'hi');
+    const container = document.createElement('div');
+    render(vnode, container);
+    expect(container.innerHTML).toBe('hi');
+  });
+
+  it('should update Text', () => {
+    const vnode1 = h(Text, 'hi');
+    const vnode2 = h(Text, 'hello');
+    const container = document.createElement('div');
+    render(vnode1, container);
+    expect(container.innerHTML).toBe('hi');
+    render(vnode2, container);
+    expect(container.innerHTML).toBe('hello');
+  });
+
+  it('should remove Text', () => {
+    const vnode = h(Text, 'hi');
+    const container = document.createElement('div');
+    render(vnode, container);
+    expect(container.innerHTML).toBe('hi');
+    render(null, container);
+    expect(container.innerHTML).toBe('');
   });
 });
