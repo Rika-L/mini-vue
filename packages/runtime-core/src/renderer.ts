@@ -21,7 +21,7 @@ export function createRenderer(renderOptions) {
     }
   };
 
-  const mountElement = (vnode, container) => {
+  const mountElement = (vnode, container,anchor) => {
     const { type, children, props, shapeFlag } = vnode;
     // 第一次渲染的时候让虚拟节点和真实dom创建管理
     // 第二次渲染新的vnode 可以和上一次的vnode做比对 之后更新el元素可以后续再复用这个dom
@@ -36,13 +36,13 @@ export function createRenderer(renderOptions) {
     if (shapeFlag & ShapeFlags.TEXT_CHILDREN) hostSetElementText(el, children);
     else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) mountChildren(children, el);
 
-    hostInsert(el, container);
+    hostInsert(el, container, anchor);
   };
 
-  const processElement = (n1, n2, container) => {
+  const processElement = (n1, n2, container,anchor) => {
     if (n1 === null) {
       // 初始化操作
-      mountElement(n2, container);
+      mountElement(n2, container, anchor);
     } else {
       patchElement(n1, n2, container);
     }
@@ -67,6 +67,131 @@ export function createRenderer(renderOptions) {
     }
   };
 
+  const patchKeyedChildren = (c1, c2, el) => {
+    // 比较两个儿子的差异来更新el
+    // [a,b,c,e,f,d]
+    // [a,b,d,q,f,d]
+
+    // 1. 减少比对范围 先从头开始比 在从尾部开始 确定不一样的范围
+    // 2 从头比对 再从尾巴比对 如果又多余的或者新增的直接操作即可
+
+    // [a,b,c]
+    // [a,b,d,e]
+    let i = 0; // 开始比对的索引
+    let e1 = c1.length - 1; // 第一个数组的尾部索引
+    let e2 = c2.length - 1; // 第二个数组的尾部索引
+
+    while (i <= e1 && i <= e2) {
+      // 有任何一方循环结束 就要终止比较
+      const n1 = c1[i];
+      const n2 = c2[i];
+      if (isSameVnode(n1, n2)) {
+        patch(n1, n2, el);
+      } else {
+        break;
+      }
+      i++;
+    }
+    // 到c的位置终止了
+    // 到d的位置终止了
+    while (i <= e1 && i <= e2) {
+      const n1 = c1[e1];
+      const n2 = c2[e2];
+      // [a,b,c]
+      // [d,e,b,c]
+      if (isSameVnode(n1, n2)) {
+        patch(n1, n2, el);
+      } else {
+        break;
+      }
+
+      e1--;
+      e2--;
+    }
+
+    // 处理增加和删除的特殊情况
+    // [a,b] [a,b,c] [a,b] [c,a,b]
+    // [a,b,c] [a,b] [c,a,b] [a,b]
+
+    // a b
+    // a b c --> 1 = 2 e1 = 1 e2 = 2 --> i>el && i <= e2
+
+    // a b
+    // c a b --> i = 0 e1 = -1 e2 = 0 --> i > e1 && i <= e2 // 新的多老的少
+    if(i > e1) { // 新的多
+      if(i <= e2){ // 有插入的部分
+        // insert
+        let nextPos = e2 + 1 // 看一下当前下一个元素是存在
+        let anchor = c2[nextPos]?.el
+        while(i <= e2){
+          patch(null, c2[i], el, anchor)
+          i++
+        }
+      }
+    }
+    // a,b,c
+    // a,b --> i = 2 e1 = 2 e2 = 1 --> i > e2 && i <= e1
+
+    // c,a,b
+    // a,b --> i = 0 e1 = 1 e2 = -1 --> i > e2 && i <= e1
+    else if(i> e2){
+      if(i <= e1){
+        // remove
+        while(i <= e1){
+          unmount(c1[i])
+          i++
+        }
+      }
+    }
+
+    // 以上确认不变化的节点 并且对插入和删除做了处理
+
+    // 后面就是特殊的比对方法
+    const s1 = i
+    const s2 = i
+
+    const keyToNewIndexMap = new Map() // 用于快速查找 看老的是否在新的里面 没有就删除 有的就更新
+
+    for(let i = s2; i <= e2; i++){
+      const vnode = c2[i]
+      keyToNewIndexMap.set(vnode.key, i)
+    }
+
+    for(let i = s1; i <= e1; i++){
+      const vnode = c1[i]
+      const newIndex = keyToNewIndexMap.get(vnode.key)
+      console.log(newIndex)
+      if(!newIndex){ // 如果新的里面找不到
+        // 删掉老的
+        unmount(vnode)
+      }else{ // 找到了
+        // 比较前后节点的差异 更新属性和儿子
+        patch(vnode,c2[newIndex],el)
+      }
+    }
+
+      // 调整顺序
+      // 可以按照新的队列 倒序插入 通过参照物往前插
+      
+      // 插入的过程中可能新的元素变多 需要创建
+
+      let toBePatched = e2 - s2 + 1; // 要倒序插入的个数
+
+      // 先从索引为3的位置倒叙插入
+      for(let i = toBePatched - 1; i >=0; i--){
+        let newIndex = s2 + i // h 对应的索引 找他的下一个元素作为参照物来进行插入
+        const anchor = c2[newIndex + 1]?.el
+        let vnode= c2[newIndex]
+        
+        if(!vnode.el){
+          // 新增的元素
+          patch(null, vnode, el, anchor) // 创建h插入
+        }else{
+          hostInsert(vnode.el, el, anchor) // 接着倒叙插入
+        }
+      }
+  };
+
   const patchChildren = (n1, n2, el) => {
     // text array null
     const c1 = n1.children;
@@ -83,19 +208,20 @@ export function createRenderer(renderOptions) {
       if (c1 !== c2) {
         hostSetElementText(el, c2);
       }
-    }else {
-      if(prevShapeFlag & ShapeFlags.ARRAY_CHILDREN) {
+    } else {
+      if (prevShapeFlag & ShapeFlags.ARRAY_CHILDREN) {
         if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
           // 全量diff 算法 两个数组比对
-        }else {
-          unmountChildren(c1)
+          patchKeyedChildren(c1, c2, el);
+        } else {
+          unmountChildren(c1);
         }
-      }else{
-        if(prevShapeFlag & ShapeFlags.TEXT_CHILDREN) {
+      } else {
+        if (prevShapeFlag & ShapeFlags.TEXT_CHILDREN) {
           hostSetElementText(el, "");
         }
 
-        if(shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
+        if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
           mountChildren(c2, el);
         }
       }
@@ -115,7 +241,7 @@ export function createRenderer(renderOptions) {
   };
 
   // 渲染走这里，更新也走这里
-  const patch = (n1, n2, container) => {
+  const patch = (n1, n2, container,anchor = null) => {
     if (n1 === n2) return; // 两次渲染同一个元素，直接跳过即可
 
     // 不是相同节点
@@ -127,7 +253,7 @@ export function createRenderer(renderOptions) {
     }
 
     // n1.shapeFlag
-    processElement(n1, n2, container); // 对元素处理
+    processElement(n1, n2, container, anchor); // 对元素处理
   };
 
   const unmount = (vnode) => {
