@@ -1,0 +1,9 @@
+{
+  "name": "vue",
+  "version": "1.0.0",
+  "module": "dist/vue.esm-bundle.js",
+  "unpkg": "dist/vue.global.js",
+  "dependencies": {
+    "@vue/runtime-dom": "workspace:*"
+  }
+}

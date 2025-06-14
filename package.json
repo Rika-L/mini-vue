@@ -7,6 +7,7 @@
   "type": "module",
   "scripts": {
     "dev": "node scripts/dev.js runtime-dom -f esm",
+    "build": "rolldown  -c rolldown.config.ts",
     "test": "vitest",
     "test:ui": "vitest --ui"
   },
@@ -24,11 +25,8 @@
     "esbuild": "^0.25.5",
     "jsdom": "^26.1.0",
     "minimist": "^1.2.8",
+    "rolldown": "1.0.0-beta.15",
     "typescript": "^5.8.3",
     "vitest": "^3.2.2"
-  },
-  "dependencies": {
-    "@vue/reactivity": "^3.5.16",
-    "@vue/shared": "^3.5.16"
   }
 }

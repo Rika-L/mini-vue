@@ -34,7 +34,6 @@ export function createRenderer(renderOptions) {
   const mountChildren = (children, container) => {
     children = normalize(children);
     for (let i = 0; i < children.length; i++) {
-      // children[i]可能是纯文本 此时会出bug，暂不考虑
       patch(null, children[i], container);
     }
   };
