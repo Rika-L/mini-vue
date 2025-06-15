@@ -1,5 +1,5 @@
 import { ShapeFlags } from "@vue/shared";
-import { createVnode, isSameVnode, Text } from "./createVnode";
+import { createVnode, Fragment, isSameVnode, Text } from "./createVnode";
 import getSequence from "./seq";
 
 export function createRenderer(renderOptions) {
@@ -15,8 +15,8 @@ export function createRenderer(renderOptions) {
     patchProp: hostPatchProp,
   } = renderOptions;
 
-    // 标准化
-    const normalize = (children) => {
+  // 标准化
+  const normalize = (children) => {
     if (Array.isArray(children)) {
       for (let i = 0; i < children.length; i++) {
         if (
@@ -276,12 +276,20 @@ export function createRenderer(renderOptions) {
     if (n1 == null) {
       // 虚拟节点要关联真实节点
       // 将节点插入到页面中
-      hostInsert(n2.el = hostCreateText(n2.children),container);
+      hostInsert((n2.el = hostCreateText(n2.children)), container);
     } else {
       const el = (n2.el = n1.el);
-      if(n1.children !== n2.children) {
+      if (n1.children !== n2.children) {
         hostSetText(el, n2.children);
       }
+    }
+  };
+
+  const processFragment = (n1, n2, container) => {
+    if (n1 == null) {
+      mountChildren(n2.children, container);
+    } else {
+      patchChildren(n1, n2, container);
     }
   };
 
@@ -302,13 +310,18 @@ export function createRenderer(renderOptions) {
       case Text:
         processText(n1, n2, container);
         break;
+      case Fragment:
+        processFragment(n1, n2, container);
+        break;
       default:
         processElement(n1, n2, container, anchor); // 对元素处理
     }
   };
 
   const unmount = (vnode) => {
-    hostRemove(vnode.el);
+    if (vnode.type === Fragment) {
+      unmountChildren(vnode.children);
+    } else hostRemove(vnode.el);
   };
 
   // 多次调用render会进行虚拟节点的比较 再进行更新
