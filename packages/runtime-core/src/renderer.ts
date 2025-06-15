@@ -1,6 +1,7 @@
 import { ShapeFlags } from "@vue/shared";
 import { createVnode, Fragment, isSameVnode, Text } from "./createVnode";
 import getSequence from "./seq";
+import { reactive, ReactiveEffect } from "@vue/reactivity";
 
 export function createRenderer(renderOptions) {
   const {
@@ -293,6 +294,50 @@ export function createRenderer(renderOptions) {
     }
   };
 
+  const mountComponent = (n2, container, anchor) => {
+    // 组件可以基于自己的状态重新渲染
+    const { data = () => {}, render } = n2.type;
+
+    // 组件的状态
+    const state = reactive(data());
+
+    const instance = {
+      state, // 组件的状态
+      vnode: n2, // 虚拟节点
+      subTree: null, // 子树
+      isMounted: false, // 是否挂载
+      update: null, // 更新
+    };
+
+    const componentUpdateFn = () => {
+      // 要在这里区分是第一个还是之后的
+      if (!instance.isMounted) {
+        const subTree = render.call(state, state);
+        instance.subTree = subTree;
+        patch(null, subTree, container, anchor);
+        instance.isMounted = true;
+      } else {
+        // 基于状态的组件更新
+        const subTree = render.call(state, state);
+        patch(instance.subTree, subTree, container, anchor);
+        instance.subTree = subTree;
+      }
+    };
+
+    const effect = new ReactiveEffect(componentUpdateFn, () => update());
+
+    const update = (instance.update = () => effect.run());
+    update();
+  };
+
+  const processComponent = (n1, n2, container, anchor) => {
+    if (n1 === null) {
+      mountComponent(n2, container, anchor);
+    } else {
+      // 组件的跟新
+    }
+  };
+
   // 渲染走这里，更新也走这里
   const patch = (n1, n2, container, anchor = null) => {
     if (n1 === n2) return; // 两次渲染同一个元素，直接跳过即可
@@ -305,7 +350,7 @@ export function createRenderer(renderOptions) {
       // 直接移除老dom元素
     }
 
-    const { type } = n2;
+    const { type, shapeFlag } = n2;
     switch (type) {
       case Text:
         processText(n1, n2, container);
@@ -314,7 +359,10 @@ export function createRenderer(renderOptions) {
         processFragment(n1, n2, container);
         break;
       default:
-        processElement(n1, n2, container, anchor); // 对元素处理
+        if (shapeFlag & ShapeFlags.ELEMENT)
+          processElement(n1, n2, container, anchor); // 对元素处理
+        else if (shapeFlag & ShapeFlags.COMPONENT)
+          processComponent(n1, n2, container, anchor); // 对组件的处理 vue3 中函数式组件已经废弃了 没有性能节约
     }
   };
 
