@@ -1,4 +1,5 @@
-import { reactive, ref, watch, watchEffect } from "@vue/reactivity";
+import { reactive, ref } from "@vue/reactivity";
+import { watchEffect, watch } from "../src/apiWatch";
 
 describe("api: watch", () => {
   it("happy path", () => {

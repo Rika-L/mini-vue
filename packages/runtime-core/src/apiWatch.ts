@@ -1,9 +1,7 @@
 // 本来watch应该在runtime-core下的 现在写在这边
 
 import { isFunction, isObject } from "@vue/shared";
-import { ReactiveEffect } from "./effect";
-import { isReactive } from "./reactive";
-import { isRef } from "./ref";
+import { ReactiveEffect, isReactive, isRef } from "@vue/reactivity";
 
 export function watch(source, cb, options = {} as any) {
   return doWatch(source, cb, options);
@@ -44,33 +42,31 @@ function doWatch(source, cb, { deep, immediate } = {} as any) {
     getter = () => reactiveGetter(source);
   } else if (isRef(source)) {
     getter = () => source.value;
-  
-
   } else if (isFunction(source)) {
     getter = source;
   }
   let oldValue;
 
-  let clean
+  let clean;
 
   const onCleanup = (fn) => {
     clean = () => {
-      fn()
-      clean = undefined
-    }
-  }
+      fn();
+      clean = undefined;
+    };
+  };
 
   const job = () => {
     if (cb) {
       const newValue = effect.run();
       cb(newValue, oldValue, onCleanup);
-    
+
       if (clean) {
-        clean() // 在执行回调前先调用上一次的清理操作 进行清理
+        clean(); // 在执行回调前先调用上一次的清理操作 进行清理
       }
 
       oldValue = newValue;
-    }else{
+    } else {
       effect.run();
     }
   };
@@ -90,8 +86,8 @@ function doWatch(source, cb, { deep, immediate } = {} as any) {
   }
 
   const unwatch = () => {
-    effect.stop()
-  }
+    effect.stop();
+  };
 
-  return unwatch
+  return unwatch;
 }
