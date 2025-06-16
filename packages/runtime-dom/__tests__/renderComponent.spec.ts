@@ -1,5 +1,4 @@
 import { h, render } from "@vue/runtime-dom";
-import { a } from "vitest/dist/chunks/suite.d.FvehnV49";
 
 // import {render,h} from '../../../public/vue.esm-browser.js'
 
@@ -32,6 +31,7 @@ describe('render: renderComponent', () => {
       props: {
         b: String
       },
+      data(){},
       render(proxy) {
         return h("div", proxy.$attrs.a + proxy.b);
       }
