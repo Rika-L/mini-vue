@@ -33,7 +33,7 @@ describe('render: renderComponent', () => {
         b: String
       },
       render(proxy) {
-        return h("div", proxy.$attrs.a + proxy.props.b);
+        return h("div", proxy.$attrs.a + proxy.b);
       }
     }
     const container = document.createElement('div');

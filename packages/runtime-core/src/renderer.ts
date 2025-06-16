@@ -1,4 +1,4 @@
-import { ShapeFlags } from "@vue/shared";
+import { hasOwn, ShapeFlags } from "@vue/shared";
 import { createVnode, Fragment, isSameVnode, Text } from "./createVnode";
 import getSequence from "./seq";
 import { reactive, ReactiveEffect } from "@vue/reactivity";
@@ -297,28 +297,30 @@ export function createRenderer(renderOptions) {
 
   // 组件实例和原始props 初始化属性
   const initProps = (instance, rawProps) => {
-    const props = {}
-    const attrs = {}
+    const props = {};
+    const attrs = {};
 
-    const propsOptions = instance.propsOptions || {} // 组件中定义的
-    if(rawProps) {
-      for (let key in rawProps) { // 用所有的来分裂
-        const value = rawProps[key]// value String | number 应该对props作校验
-        if(key in propsOptions) { // propsOptions[key]
-          props[key] = value
-        }else{
-          attrs[key] = value
+    const propsOptions = instance.propsOptions || {}; // 组件中定义的
+    if (rawProps) {
+      for (let key in rawProps) {
+        // 用所有的来分裂
+        const value = rawProps[key]; // value String | number 应该对props作校验
+        if (key in propsOptions) {
+          // propsOptions[key]
+          props[key] = value;
+        } else {
+          attrs[key] = value;
         }
       }
     }
 
-    instance.props = reactive(props)
-    instance.attrs = attrs
-  }
+    instance.props = reactive(props);
+    instance.attrs = attrs;
+  };
 
   const mountComponent = (vnode, container, anchor) => {
     // 组件可以基于自己的状态重新渲染
-    const { data = () => {}, render,props:propsOptions = {} } = vnode.type;
+    const { data = () => {}, render, props: propsOptions = {} } = vnode.type;
 
     // 组件的状态
     const state = reactive(data());
@@ -329,38 +331,71 @@ export function createRenderer(renderOptions) {
       subTree: null, // 子树
       isMounted: false, // 是否挂载
       update: null, // 更新
-      props:{},
-      attrs:{},
+      props: {},
+      attrs: {},
       propsOptions,
-      component:null,
+      component: null,
+      proxy: null, // 用来代理props attrs data 让用户更方便的访问
     };
 
     // 根据propsOptions 来区分出 props attrs
     vnode.component = instance;
-    
+
     // 元素更新 n2.el = n1.el
     // 组件更新 n2.component.subTree.el = n1.component.subTree.el
 
-    initProps(instance, vnode.props)
+    initProps(instance, vnode.props);
 
-    console.log(instance)
+    const publicProperty = {
+      $attrs: (instance) => instance.attrs,
+    };
+    instance.proxy = new Proxy(instance, {
+      get(target, key) {
+        const { state, props } = target;
 
+        if (state && hasOwn(state, key)) {
+          return state[key];
+        } else if (props && hasOwn(props, key)) {
+          return props[key];
+        }
+
+        // 对于一些无法修改的属性 $slots $attrs $slots => instance.slots
+        const getter = publicProperty[key]; // 通过不同的策略来访问对应的方法
+        if (getter) {
+          return getter(instance);
+        }
+      },
+      set(target, key, value) {
+        const { state, props } = target;
+        if (state && hasOwn(state, key)) {
+          state[key] = value;
+        } else if (props && hasOwn(props, key)) {
+          props[key] = value;
+          console.warn("props is readonly");
+        }
+        return true;
+      },
+    });
+
+    // props attrs data 应该都可以被直接访问到
     const componentUpdateFn = () => {
       // 要在这里区分是第一个还是之后的
       if (!instance.isMounted) {
-        const subTree = render.call(state, state);
+        const subTree = render.call(state, instance.proxy);
         instance.subTree = subTree;
         patch(null, subTree, container, anchor);
         instance.isMounted = true;
       } else {
         // 基于状态的组件更新
-        const subTree = render.call(state, state);
+        const subTree = render.call(state, instance.proxy);
         patch(instance.subTree, subTree, container, anchor);
         instance.subTree = subTree;
       }
     };
 
-    const effect = new ReactiveEffect(componentUpdateFn, () => queueJob(update));
+    const effect = new ReactiveEffect(componentUpdateFn, () =>
+      queueJob(update)
+    );
 
     const update = (instance.update = () => effect.run());
     update();
