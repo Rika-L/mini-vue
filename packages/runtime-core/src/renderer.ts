@@ -295,20 +295,55 @@ export function createRenderer(renderOptions) {
     }
   };
 
-  const mountComponent = (n2, container, anchor) => {
+  // 组件实例和原始props 初始化属性
+  const initProps = (instance, rawProps) => {
+    const props = {}
+    const attrs = {}
+
+    const propsOptions = instance.propsOptions || {} // 组件中定义的
+    if(rawProps) {
+      for (let key in rawProps) { // 用所有的来分裂
+        const value = rawProps[key]// value String | number 应该对props作校验
+        if(key in propsOptions) { // propsOptions[key]
+          props[key] = value
+        }else{
+          attrs[key] = value
+        }
+      }
+    }
+
+    instance.props = reactive(props)
+    instance.attrs = attrs
+  }
+
+  const mountComponent = (vnode, container, anchor) => {
     // 组件可以基于自己的状态重新渲染
-    const { data = () => {}, render } = n2.type;
+    const { data = () => {}, render,props:propsOptions = {} } = vnode.type;
 
     // 组件的状态
     const state = reactive(data());
 
     const instance = {
       state, // 组件的状态
-      vnode: n2, // 虚拟节点
+      vnode, // 虚拟节点
       subTree: null, // 子树
       isMounted: false, // 是否挂载
       update: null, // 更新
+      props:{},
+      attrs:{},
+      propsOptions,
+      component:null,
     };
+
+    // 根据propsOptions 来区分出 props attrs
+    vnode.component = instance;
+    
+    // 元素更新 n2.el = n1.el
+    // 组件更新 n2.component.subTree.el = n1.component.subTree.el
+
+    initProps(instance, vnode.props)
+
+    console.log(instance)
 
     const componentUpdateFn = () => {
       // 要在这里区分是第一个还是之后的

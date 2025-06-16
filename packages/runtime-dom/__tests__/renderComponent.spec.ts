@@ -1,4 +1,5 @@
 import { h, render } from "@vue/runtime-dom";
+import { a } from "vitest/dist/chunks/suite.d.FvehnV49";
 
 // import {render,h} from '../../../public/vue.esm-browser.js'
 
@@ -21,6 +22,24 @@ describe('render: renderComponent', () => {
   render(h(VueComponent), container)
   expect(container.innerHTML).toBe('<div>hello</div>');
   });
+
+  // 区分attrs 和 props
+  // 属性 attrs(非响应式) props(响应式)
+  // 在开发模式下 attrs 是响应式的
+  // 在生产模式下 attrs 是非响应式的   
+  it('should distinguish attrs and props', () => {
+    const VueComponent = {
+      props: {
+        b: String
+      },
+      render(proxy) {
+        return h("div", proxy.$attrs.a + proxy.props.b);
+      }
+    }
+    const container = document.createElement('div');
+    render(h(VueComponent, { a: "hello", b: "world" }), container);
+    expect(container.innerHTML).toBe('<div>helloworld</div>');
+  })
 
   it.skip('should update component', () => {
     const VueComponent = {
