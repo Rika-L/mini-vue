@@ -21,7 +21,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.15.30",
-    "@vitest/ui": "^3.2.2",
+    "@vitest/ui": "^3.2.3",
     "esbuild": "^0.25.5",
     "jsdom": "^26.1.0",
     "minimist": "^1.2.8",

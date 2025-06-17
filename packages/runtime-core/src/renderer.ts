@@ -333,11 +333,55 @@ export function createRenderer(renderOptions) {
     // 组件可以基于自己的状态重新渲染
   };
 
+  const hasPropsChange = (prevProps, nextProps) => {
+    let nKeys = Object.keys(nextProps);
+    if (nKeys.length !== Object.keys(prevProps).length) {
+      // 长度不一样 肯定变了
+      return true;
+    }
+
+    for (let i = 0; i < nKeys.length; i++) {
+      const key = nKeys[i];
+      if (prevProps[key] !== nextProps[key]) {
+        return true;
+      }
+    }
+
+    return false;
+  };
+
+  const updateProps = (instance, pervProps, nextProps) => {
+    // 如果props发生了变化
+    // 更新属性 用新的覆盖掉老的
+    // 删除老的
+    if (hasPropsChange(pervProps, nextProps)) {
+      for (let key in nextProps) {
+        instance.props[key] = nextProps[key];
+      }
+
+      for (let key in instance.props) {
+        if (!(key in nextProps)) {
+          delete instance.props[key];
+        }
+      }
+    }
+  };
+
+  const updateComponent = (n1, n2) => {
+    const instance = (n2.component = n1.component);
+
+    const { props: prevProps } = n1;
+    const { props: nextProps } = n2;
+
+    updateProps(instance, prevProps, nextProps);
+  };
+
   const processComponent = (n1, n2, container, anchor) => {
     if (n1 === null) {
       mountComponent(n2, container, anchor);
     } else {
-      // 组件的跟新
+      // 组件的更新
+      updateComponent(n1, n2);
     }
   };
 

@@ -79,11 +79,13 @@ export function setupComponent(instance) {
 
   instance.proxy = new Proxy(instance, handler);
 
-  const { data, render } = vnode.type;
-  if (!isFunction(data)) return console.warn("data should be function");
-
-  // data中可以拿到props
-  instance.data = reactive(data.call(instance.proxy));
+  const { data = () => ({}), render } = vnode.type;
+  if (!isFunction(data)) {
+    console.warn("data should be a function");
+  } else {
+    // data中可以拿到props
+    instance.data = reactive(data.call(instance.proxy));
+  }
 
   instance.render = render;
 }
