@@ -182,7 +182,7 @@ export function createRenderer(renderOptions) {
 
       // 根据新的节点找到对应老的位置
       const toBePatched = e2 - s2 + 1 // 要倒序插入的个数
-      const newIndexToOldMapIndex = Array.from({length: toBePatched}).fill(0) // 用于记录新的节点在老的里面的位置
+      const newIndexToOldMapIndex = Array.from({ length: toBePatched }).fill(0) // 用于记录新的节点在老的里面的位置
 
       for (let i = s2; i <= e2; i++) {
         const vnode = c2[i]
@@ -310,6 +310,14 @@ export function createRenderer(renderOptions) {
     }
   }
 
+  const updateComponentPreRender = (instance, next) => {
+    instance.next = null
+    instance.vnode = next
+    // instance.props
+
+    updateProps(instance, instance.props, next.props)
+  }
+
   function setupRenderEffect(instance, container, anchor) {
     const { render } = instance
     // props attrs data 应该都可以被直接访问到
@@ -323,6 +331,15 @@ export function createRenderer(renderOptions) {
       }
       else {
         // 基于状态的组件更新
+
+        const { next } = instance
+        if (next) {
+          // 说明属性或插槽有更新
+          // 更新属性或插槽
+          updateComponentPreRender(instance, next)
+          // slots props
+        }
+
         const subTree = render.call(instance.proxy, instance.proxy)
         patch(instance.subTree, subTree, container, anchor)
         instance.subTree = subTree
@@ -381,13 +398,33 @@ export function createRenderer(renderOptions) {
     }
   }
 
+  const shouldComponentUpdate = (n1, n2) => {
+    const { props: prevProps, children: prevChildren } = n1
+    const { props: nextProps, children: nextChildren } = n2
+    if (prevChildren || nextChildren) {
+      return true // 有插槽直接走重新渲染
+    }
+
+    if (prevProps === nextProps) { // props没有变化
+      return false
+    }
+
+    // 如果属性不一致则更新
+    return hasPropsChange(prevProps, nextProps)
+  }
+
   const updateComponent = (n1, n2) => {
     const instance = (n2.component = n1.component)
 
-    const { props: prevProps } = n1
-    const { props: nextProps } = n2
+    if (shouldComponentUpdate(n1, n2)) {
+      instance.next = n2 // 如果调用update有next属性 说明是属性更新、插槽更新
+      instance.update() // 让更新逻辑统一
+    }
 
-    updateProps(instance, prevProps, nextProps)
+    // const { props: prevProps } = n1
+    // const { props: nextProps } = n2
+
+    // updateProps(instance, prevProps, nextProps)
   }
 
   const processComponent = (n1, n2, container, anchor) => {
