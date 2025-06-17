@@ -1,4 +1,4 @@
-import patchAttr from "../src/modules/patchAttr";
+import patchAttr from '../src/modules/patchAttr'
 
 describe('runtime-dom: patchAttr', () => {
   it('happy path', () => {
@@ -8,5 +8,5 @@ describe('runtime-dom: patchAttr', () => {
     expect(el.getAttribute('foo')).toBe('bar')
     patchAttr(el, 'foo', null)
     expect(el.getAttribute('foo')).toBe(null)
-  });
-});
+  })
+})

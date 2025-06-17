@@ -1,28 +1,32 @@
 {
   "name": "mini-vue",
-  "private": true,
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
   "type": "module",
+  "version": "1.0.0",
+  "private": true,
+  "packageManager": "pnpm@10.11.0",
+  "description": "",
+  "author": "",
+  "license": "ISC",
+  "keywords": [],
+  "main": "index.js",
   "scripts": {
     "dev": "node scripts/dev.js runtime-dom -f esm",
     "build": "rolldown  -c rolldown.config.ts",
     "test": "vitest",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "packageManager": "pnpm@10.11.0",
   "volta": {
     "node": "18.20.8",
     "pnpm": "10.11.0"
   },
   "devDependencies": {
+    "@antfu/eslint-config": "^4.14.1",
     "@types/node": "^22.15.30",
     "@vitest/ui": "^3.2.3",
     "esbuild": "^0.25.5",
+    "eslint": "^9.29.0",
     "jsdom": "^26.1.0",
     "minimist": "^1.2.8",
     "rolldown": "1.0.0-beta.15",

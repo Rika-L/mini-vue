@@ -1,4 +1,4 @@
-import { nodeOps } from "../src/nodeOps";
+import { nodeOps } from '../src/nodeOps'
 
 describe('runtime-dom: nodeOps', () => {
   it('happy path', () => {
@@ -26,5 +26,5 @@ describe('runtime-dom: nodeOps', () => {
     const el2 = nodeOps.createElement('div')
     nodeOps.insert(el2, document.body, null)
     expect(nodeOps.nextSibling(el)).toBe(el2)
-  });
-});
+  })
+})

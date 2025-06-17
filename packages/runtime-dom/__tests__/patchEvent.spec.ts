@@ -1,4 +1,4 @@
-import patchEvent from "../src/modules/patchEvent";
+import patchEvent from '../src/modules/patchEvent'
 
 describe('runtime-dom: patchEvent', () => {
   it('happy path', () => {
@@ -11,7 +11,7 @@ describe('runtime-dom: patchEvent', () => {
     expect(fn).toHaveBeenCalledTimes(2)
     el.dispatchEvent(new Event('click'))
     expect(fn).toHaveBeenCalledTimes(3)
-  });
+  })
 
   it('should update event handler', () => {
     const el = document.createElement('div')
@@ -24,5 +24,5 @@ describe('runtime-dom: patchEvent', () => {
     el.dispatchEvent(new Event('click'))
     expect(fn).toHaveBeenCalledTimes(1)
     expect(fn2).toHaveBeenCalledTimes(1)
-  });
-});
+  })
+})

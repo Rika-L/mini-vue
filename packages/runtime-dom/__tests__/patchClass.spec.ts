@@ -1,4 +1,4 @@
-import patchClass from "../src/modules/patchClass";
+import patchClass from '../src/modules/patchClass'
 
 describe('runtime-dom: patchClass', () => {
   it('happy path', () => {
@@ -7,5 +7,5 @@ describe('runtime-dom: patchClass', () => {
     expect(el.className).toBe('a')
     patchClass(el, null)
     expect(el.className).toBe('')
-  });
-});
+  })
+})

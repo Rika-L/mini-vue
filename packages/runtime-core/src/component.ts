@@ -1,5 +1,5 @@
-import { reactive } from "@vue/reactivity";
-import { hasOwn, isFunction } from "@vue/shared";
+import { reactive } from '@vue/reactivity'
+import { hasOwn, isFunction } from '@vue/shared'
 
 export function createComponentInstance(vnode) {
   const instance = {
@@ -13,79 +13,83 @@ export function createComponentInstance(vnode) {
     propsOptions: vnode.type.props, // 用户声明的属性
     component: null,
     proxy: null, // 用来代理props attrs data 让用户更方便的访问
-  };
+  }
 
-  return instance;
+  return instance
 }
 
 // 组件实例和原始props 初始化属性
-const initProps = (instance, rawProps) => {
-  const props = {};
-  const attrs = {};
+function initProps(instance, rawProps) {
+  const props = {}
+  const attrs = {}
 
-  const propsOptions = instance.propsOptions || {}; // 组件中定义的
+  const propsOptions = instance.propsOptions || {} // 组件中定义的
   if (rawProps) {
-    for (let key in rawProps) {
+    for (const key in rawProps) {
       // 用所有的来分裂
-      const value = rawProps[key]; // value String | number 应该对props作校验
+      const value = rawProps[key] // value String | number 应该对props作校验
       if (key in propsOptions) {
         // propsOptions[key]
-        props[key] = value;
-      } else {
-        attrs[key] = value;
+        props[key] = value
+      }
+      else {
+        attrs[key] = value
       }
     }
   }
 
-  instance.props = reactive(props);
-  instance.attrs = attrs;
-};
+  instance.props = reactive(props)
+  instance.attrs = attrs
+}
 
 const publicProperty = {
-  $attrs: (instance) => instance.attrs,
-};
+  $attrs: instance => instance.attrs,
+}
 
 const handler = {
   get(target, key) {
-    const { data, props } = target;
+    const { data, props } = target
 
     if (data && hasOwn(data, key)) {
-      return data[key];
-    } else if (props && hasOwn(props, key)) {
-      return props[key];
+      return data[key]
+    }
+    else if (props && hasOwn(props, key)) {
+      return props[key]
     }
 
     // 对于一些无法修改的属性 $slots $attrs $slots => instance.slots
-    const getter = publicProperty[key]; // 通过不同的策略来访问对应的方法
+    const getter = publicProperty[key] // 通过不同的策略来访问对应的方法
     if (getter) {
-      return getter(target);
+      return getter(target)
     }
   },
   set(target, key, value) {
-    const { data, props } = target;
+    const { data, props } = target
     if (data && hasOwn(data, key)) {
-      data[key] = value;
-    } else if (props && hasOwn(props, key)) {
-      props[key] = value;
-      console.warn("props is readonly");
+      data[key] = value
     }
-    return true;
+    else if (props && hasOwn(props, key)) {
+      props[key] = value
+      console.warn('props is readonly')
+    }
+    return true
   },
-};
+}
 
 export function setupComponent(instance) {
-  const { vnode } = instance;
-  initProps(instance, vnode.props);
+  const { vnode } = instance
+  initProps(instance, vnode.props)
 
-  instance.proxy = new Proxy(instance, handler);
+  instance.proxy = new Proxy(instance, handler)
 
-  const { data = () => ({}), render } = vnode.type;
+  const { data = () => ({}), render } = vnode.type
   if (!isFunction(data)) {
-    console.warn("data should be a function");
-  } else {
+    console.warn('data should be a function')
+  }
+  else {
     // data中可以拿到props
-    instance.data = reactive(data.call(instance.proxy));
+    instance.data = reactive(data.call(instance.proxy))
   }
 
-  instance.render = render;
+  instance.render = render
 }

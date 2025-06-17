@@ -1,18 +1,19 @@
-import { defineConfig } from "vitest/config";
-import path from "node:path";
+import path from 'node:path'
+import { defineConfig } from 'vitest/config'
+
 export default defineConfig({
   test: {
     globals: true,
     environmentMatchGlobs: [
       ['packages/{vue,vue-compat,runtime-dom}/**', 'jsdom'],
     ],
-  }, 
-  resolve:{
+  },
+  resolve: {
     alias: [
       {
         find: /@vue\/([\w-]*)/,
-        replacement: path.resolve(__dirname, "packages") + "/$1/src"
-      }
-    ]
-  }
-});
+        replacement: `${path.resolve(__dirname, 'packages')}/$1/src`,
+      },
+    ],
+  },
+})
