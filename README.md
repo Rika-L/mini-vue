@@ -9,3 +9,23 @@ packages
 ├─ vue
 └─ reactivity
 ```
+
+## Already implemented
+* reactivity
+  * effect
+  * reactive
+  * ref
+  * computed
+  * toRef
+  * toRefs
+  * unRef
+  * proxyRefs
+* runtime-dom
+  * renderOptions
+    * nodeOps
+    * patchProp
+  * render
+* runtime-core
+  * createRenderer
+  * nextTick
+  * watch

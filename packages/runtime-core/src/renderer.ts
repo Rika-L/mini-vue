@@ -182,7 +182,7 @@ export function createRenderer(renderOptions) {
 
       // 根据新的节点找到对应老的位置
       const toBePatched = e2 - s2 + 1 // 要倒序插入的个数
-      const newIndexToOldMapIndex = new Array(toBePatched).fill(0) // 用于记录新的节点在老的里面的位置
+      const newIndexToOldMapIndex = Array.from({length: toBePatched}).fill(0) // 用于记录新的节点在老的里面的位置
 
       for (let i = s2; i <= e2; i++) {
         const vnode = c2[i]
