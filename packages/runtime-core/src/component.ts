@@ -1,4 +1,4 @@
-import { reactive } from '@vue/reactivity'
+import { proxyRefs, reactive } from '@vue/reactivity'
 import { hasOwn, isFunction } from '@vue/shared'
 
 export function createComponentInstance(vnode) {
@@ -13,6 +13,7 @@ export function createComponentInstance(vnode) {
     propsOptions: vnode.type.props, // 用户声明的属性
     component: null,
     proxy: null, // 用来代理props attrs data 让用户更方便的访问
+    setupState: {},
   }
 
   return instance
@@ -48,13 +49,16 @@ const publicProperty = {
 
 const handler = {
   get(target, key) {
-    const { data, props } = target
+    const { data, props, setupState } = target
 
     if (data && hasOwn(data, key)) {
       return data[key]
     }
     else if (props && hasOwn(props, key)) {
       return props[key]
+    }
+    else if (setupState && hasOwn(setupState, key)) {
+      return setupState[key]
     }
 
     // 对于一些无法修改的属性 $slots $attrs $slots => instance.slots
@@ -64,13 +68,16 @@ const handler = {
     }
   },
   set(target, key, value) {
-    const { data, props } = target
+    const { data, props, setupState } = target
     if (data && hasOwn(data, key)) {
       data[key] = value
     }
     else if (props && hasOwn(props, key)) {
       props[key] = value
       console.warn('props is readonly')
+    }
+    else if (setupState && hasOwn(setupState, key)) {
+      setupState[key] = value
     }
     return true
   },
@@ -82,7 +89,21 @@ export function setupComponent(instance) {
 
   instance.proxy = new Proxy(instance, handler)
 
-  const { data = () => ({}), render } = vnode.type
+  const { data = () => ({}), render, setup } = vnode.type
+
+  if (setup) {
+    const setupContext = {
+
+    }
+    const setupResult = setup(instance.props, setupContext)
+    if (isFunction(setupResult)) {
+      instance.render = setupResult
+    }
+    else {
+      instance.setupState = proxyRefs(setupResult) // 将返回值脱ref
+    }
+  }
+
   if (!isFunction(data)) {
     console.warn('data should be a function')
   }
@@ -91,5 +112,6 @@ export function setupComponent(instance) {
     instance.data = reactive(data.call(instance.proxy))
   }
 
-  instance.render = render
+  if (!instance.render) // 没有render用自己的render
+    instance.render = render
 }

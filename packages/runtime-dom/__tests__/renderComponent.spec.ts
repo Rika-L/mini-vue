@@ -1,6 +1,6 @@
-import { Fragment, h, nextTick, render, Text } from '@vue/runtime-dom'
+import { Fragment, h, nextTick, ref, render, Text } from '@vue/runtime-dom'
 
-// import {render,h} from '../../../public/vue.esm-browser.js'
+// import { h, render } from '../../../public/vue.esm-browser.js'
 
 describe('render: renderComponent', () => {
   it('should render component', () => {
@@ -77,4 +77,78 @@ describe('render: renderComponent', () => {
     await nextTick() // 等待更新完成
     expect(container.innerHTML).toBe(`<button id="toggle">toggle</button>A`)
   })
+
+  // 支持 setup
+  // setup 函数 每个组件只会执行一次 可以放入composition api
+  // 解决反复横跳问题
+  // setup 可以返回函数 也可以返回对象
+  it('should support setup; setup return render', () => {
+    const VueComponent = {
+      setup() {
+        return () => h('div', 'hello')
+      },
+    }
+    const container = document.createElement('div')
+    render(h(VueComponent), container)
+    expect(container.innerHTML).toBe('<div>hello</div>')
+  })
+
+  it('setup: setup return an object', () => {
+    const VueComponent = {
+      setup() {
+        return {
+        }
+      },
+      render() {
+        return h('div', 'hello')
+      },
+    }
+    const container = document.createElement('div')
+    render(h(VueComponent), container)
+    expect(container.innerHTML).toBe('<div>hello</div>')
+  })
+
+  // setup返回一个render并且组件有render的情况下 setup返回的render的优先级更高
+  it('setup: return a render and component have render', () => {
+    const VueComponent = {
+      setup() {
+        return () => h('div', 'hello')
+      },
+      render() {
+        return h('div', 'world')
+      },
+    }
+    const container = document.createElement('div')
+    render(h(VueComponent), container)
+    expect(container.innerHTML).toBe('<div>hello</div>')
+  })
+
+  // 在setup返回的render中使用ref
+  it('setup: support ref', () => {
+    const VueComponent = {
+      setup() {
+        const str = ref('hello word')
+        return () => h('div', str.value)
+      },
+    }
+    const container = document.createElement('div')
+    render(h(VueComponent), container)
+    expect(container.innerHTML).toBe('<div>hello word</div>')
+  })
+
+  // 在组件的render中通过proxy使用ref
+  it('setup: support ref in Component.render', () => {
+    const VueComponent = {
+      setup() {
+        const str = ref('hello word')
+        return { str }
+      },
+      render(proxy){
+        return h('div', proxy.str)
+      }
+    }
+    const container = document.createElement('div')
+    render(h(VueComponent), container)
+    expect(container.innerHTML).toBe('<div>hello word</div>')
+  });
 })

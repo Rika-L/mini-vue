@@ -10,6 +10,34 @@ packages
 └─ reactivity
 ```
 
+## How to use
+
+### install
+
+```
+pnpm install
+```
+
+### build
+
+output `packages/vue/dist`
+
+```
+pnpm build
+```
+
+### test
+
+```
+pnpm test
+```
+
+or
+
+```
+pnpm test:ui
+```
+
 ## Already implemented
 * reactivity
   * effect
@@ -29,3 +57,10 @@ packages
   * createRenderer
   * nextTick
   * watch
+  * watchEffect
+  * 组件渲染
+    * props attrs
+    * setup
+  * Text渲染
+  * Fragment渲染
+  * Element渲染
