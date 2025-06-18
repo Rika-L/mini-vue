@@ -15,7 +15,10 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-    "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix"
+    "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
   },
   "volta": {
     "node": "18.20.8",
@@ -32,5 +35,13 @@
     "rolldown": "1.0.0-beta.15",
     "typescript": "^5.8.3",
     "vitest": "^3.2.2"
+  },
+  "pnpm": {
+    "overrides": {
+      "vite": "npm:rolldown-vite@latest"
+    }
+  },
+  "dependencies": {
+    "vitepress": "^1.6.3"
   }
 }
