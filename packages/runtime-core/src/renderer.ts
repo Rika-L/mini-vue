@@ -275,7 +275,7 @@ export function createRenderer(renderOptions) {
     }
   }
 
-  const patchElement = (n1, n2, container) => {
+  const patchElement = (n1, n2, _container) => {
     // 1.比较元素的差异 肯定需要复用dom元素
     // 2.比较属性的差异
     const el = (n2.el = n1.el) // 对dom元素的复用

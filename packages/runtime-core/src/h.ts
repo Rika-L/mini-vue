@@ -1,3 +1,4 @@
+/* eslint-disable prefer-rest-params */
 // h具有多种重载
 
 import { isObject } from '@vue/shared'

@@ -143,12 +143,56 @@ describe('render: renderComponent', () => {
         const str = ref('hello word')
         return { str }
       },
-      render(proxy){
+      render(proxy) {
         return h('div', proxy.str)
-      }
+      },
     }
     const container = document.createElement('div')
     render(h(VueComponent), container)
     expect(container.innerHTML).toBe('<div>hello word</div>')
-  });
+  })
+
+  // slot
+  it('slot: happy path', () => {
+    const RenderComponent = {
+      render(proxy) {
+        return h(Fragment, [proxy.$slots.default()])
+      },
+    }
+    const VueComponent = {
+      render() {
+        return h(RenderComponent, null, {
+          default: () => h('div', 'slot'),
+        })
+      },
+    }
+
+    const container = document.createElement('div')
+    render(h(VueComponent), container)
+    expect(container.innerHTML).toBe('<div>slot</div>')
+  })
+
+  // 作用域插槽
+  it('slot: scope', () => {
+    const RenderComponent = {
+      render(proxy) {
+        return h(Fragment, [proxy.$slots.default({ foo: 'bar' })])
+      },
+    }
+    const VueComponent = {
+      render() {
+        return h(RenderComponent, null, {
+          default: ({ foo }) => h('div', foo),
+        })
+      },
+    }
+    const container = document.createElement('div')
+    render(h(VueComponent), container)
+    expect(container.innerHTML).toBe('<div>bar</div>')
+  })
+
+  // 支持响应事件
+  it('should ', () => {
+
+  })
 })
