@@ -467,10 +467,14 @@ export function createRenderer(renderOptions) {
   }
 
   const unmount = (vnode) => {
+    const { shapeFlag } = vnode
     // 卸载组件
-    
+
     if (vnode.type === Fragment) {
       unmountChildren(vnode.children)
+    }
+    else if (shapeFlag & ShapeFlags.COMPONENT) {
+      unmount(vnode.component.subTree)
     }
     else {
       hostRemove(vnode.el)
