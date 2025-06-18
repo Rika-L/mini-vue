@@ -192,7 +192,17 @@ describe('render: renderComponent', () => {
   })
 
   // 支持响应事件
-  it('should ', () => {
-
+  it('emit: support render', () => {
+    const VueComponent = {
+      setup(_props, { emit }) {
+        return () => h('button', { onClick: () => emit('myEvent'), id: 'add' })
+      },
+    }
+    const container = document.createElement('div')
+    let count = 0
+    render(h(VueComponent, { onMyEvent: () => count++ }), container)
+    const button = container.querySelector('#add') as HTMLButtonElement
+    button.click()
+    expect(count).toBe(1)
   })
 })

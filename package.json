@@ -10,8 +10,8 @@
   "keywords": [],
   "main": "index.js",
   "scripts": {
-    "dev": "node scripts/dev.js runtime-dom -f esm",
-    "build": "rolldown  -c rolldown.config.ts",
+    "dev": "rolldown -c rolldown.config.ts -w",
+    "build": "rolldown -c rolldown.config.ts",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",

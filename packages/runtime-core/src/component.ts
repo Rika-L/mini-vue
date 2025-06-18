@@ -105,7 +105,17 @@ export function setupComponent(instance) {
 
   if (setup) {
     const setupContext = {
+      slots: instance.slots,
+      attrs: instance.attrs,
+      emit(event, ...payload) {
+        const eventName = `on${event[0].toUpperCase() + event.slice(1)}`
 
+        const handler = instance.vnode.props[eventName]
+
+        console.log(eventName)
+
+        handler(...payload)
+      },
     }
     const setupResult = setup(instance.props, setupContext)
     if (isFunction(setupResult)) {
