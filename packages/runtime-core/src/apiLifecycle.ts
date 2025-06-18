@@ -5,6 +5,8 @@ export enum LifeCycles {
   MOUNTED = 'm',
   BEFORE_UPDATE = 'bu',
   UPDATE = 'u',
+  BEFORE_UNMOUNT = 'bum',
+  UNMOUNTED = 'um',
 }
 
 function createHook(type) {
@@ -33,6 +35,8 @@ export const onBeforeMount = createHook(LifeCycles.BEFORE_MOUNT)
 export const onMounted = createHook(LifeCycles.MOUNTED)
 export const onBeforeUpdate = createHook(LifeCycles.BEFORE_UPDATE)
 export const onUpdate = createHook(LifeCycles.UPDATE)
+export const onBeforeUnmount = createHook(LifeCycles.BEFORE_UNMOUNT)
+export const onUnmounted = createHook(LifeCycles.UNMOUNTED)
 
 export function invokeArray(fns) {
   fns.forEach(fn => fn())

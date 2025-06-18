@@ -1,8 +1,10 @@
 import {
   h,
   onBeforeMount,
+  onBeforeUnmount,
   onBeforeUpdate,
   onMounted,
+  onUnmounted,
   onUpdate,
   ref,
   render,
@@ -38,5 +40,22 @@ describe('runtime-core: lifecycle', () => {
       },
     }
     render(h(VueComponent), container)
+  })
+
+  it('should support onBeforeUnmount onUnmounted', () => {
+    const container = document.createElement('div')
+    const VueComponent = {
+      setup() {
+        onBeforeUnmount(() => {
+          expect(container.innerHTML).toBe('<div>hello</div>')
+        })
+        onUnmounted(() => {
+          expect(container.innerHTML).toBe('')
+        })
+        return () => h('div', 'hello')
+      },
+    }
+    render(h(VueComponent), container)
+    render(null, container)
   })
 })
