@@ -467,6 +467,8 @@ export function createRenderer(renderOptions) {
   }
 
   const unmount = (vnode) => {
+    // 卸载组件
+    
     if (vnode.type === Fragment) {
       unmountChildren(vnode.children)
     }

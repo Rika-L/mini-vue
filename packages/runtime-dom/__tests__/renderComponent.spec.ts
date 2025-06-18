@@ -205,4 +205,19 @@ describe('render: renderComponent', () => {
     button.click()
     expect(count).toBe(1)
   })
+
+  // 组件卸载
+  it('should unmount component', () => {
+    const VueComponent = {
+      render() {
+        return h('div', 'hello')
+      },
+    }
+
+    const container = document.createElement('div')
+    render(h(VueComponent), container)
+    expect(container.innerHTML).toBe('<div>hello</div>')
+    render(null, container)
+    expect(container.innerHTML).toBe('')
+  })
 })
