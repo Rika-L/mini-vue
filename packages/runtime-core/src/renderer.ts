@@ -1,5 +1,7 @@
+/* eslint-disable unused-imports/no-unused-vars */
 import { ReactiveEffect } from '@vue/reactivity'
 import { ShapeFlags } from '@vue/shared'
+import { invokeArray } from './apiLifecycle'
 import { createComponentInstance, setupComponent } from './component'
 import { createVnode, Fragment, isSameVnode, Text } from './createVnode'
 import { queueJob } from './scheduler'
@@ -323,16 +325,25 @@ export function createRenderer(renderOptions) {
     // props attrs data 应该都可以被直接访问到
     const componentUpdateFn = () => {
       // 要在这里区分是第一个还是之后的
+      const { bm, m } = instance
       if (!instance.isMounted) {
+        if (bm) {
+          invokeArray(bm)
+        }
+
         const subTree = render.call(instance.proxy, instance.proxy)
-        instance.subTree = subTree
         patch(null, subTree, container, anchor)
         instance.isMounted = true
+        instance.subTree = subTree
+
+        if (m) {
+          invokeArray(m)
+        }
       }
       else {
         // 基于状态的组件更新
 
-        const { next } = instance
+        const { next, bu, u } = instance
         if (next) {
           // 说明属性或插槽有更新
           // 更新属性或插槽
@@ -340,9 +351,17 @@ export function createRenderer(renderOptions) {
           // slots props
         }
 
+        if (bu) {
+          invokeArray(bu)
+        }
+
         const subTree = render.call(instance.proxy, instance.proxy)
         patch(instance.subTree, subTree, container, anchor)
         instance.subTree = subTree
+
+        if (u) {
+          invokeArray(u)
+        }
       }
     }
 

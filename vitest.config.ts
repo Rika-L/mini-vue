@@ -5,7 +5,7 @@ export default defineConfig({
   test: {
     globals: true,
     environmentMatchGlobs: [
-      ['packages/{vue,vue-compat,runtime-dom}/**', 'jsdom'],
+      ['packages/{vue,vue-compat,runtime-dom,runtime-core}/**', 'jsdom'],
     ],
   },
   resolve: {

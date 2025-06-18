@@ -24,6 +24,9 @@
     "node": "18.20.8",
     "pnpm": "10.11.0"
   },
+  "dependencies": {
+    "vitepress": "^1.6.3"
+  },
   "devDependencies": {
     "@antfu/eslint-config": "^4.14.1",
     "@types/node": "^22.15.30",
@@ -40,8 +43,5 @@
     "overrides": {
       "vite": "npm:rolldown-vite@latest"
     }
-  },
-  "dependencies": {
-    "vitepress": "^1.6.3"
   }
 }

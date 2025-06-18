@@ -1,4 +1,6 @@
+export * from './apiLifecycle'
 export * from './apiWatch'
+export * from './component'
 export * from './createVnode'
 export * from './h'
 export * from './renderer'

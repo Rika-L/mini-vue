@@ -119,7 +119,9 @@ export function setupComponent(instance) {
         instance.exposed = value
       },
     }
+    setCurrentInstance(instance)
     const setupResult = setup(instance.props, setupContext)
+    unsetCurrentInstance()
     if (isFunction(setupResult)) {
       instance.render = setupResult
     }
@@ -138,4 +140,17 @@ export function setupComponent(instance) {
 
   if (!instance.render) // 没有render用自己的render
     instance.render = render
+}
+
+export let currentInstance = null
+export function getCurrentInstance() {
+  return currentInstance
+}
+
+export function setCurrentInstance(instance) {
+  currentInstance = instance
+}
+
+export function unsetCurrentInstance() {
+  currentInstance = null
 }
