@@ -1,3 +1,4 @@
+export * from './apiInject'
 export * from './apiLifecycle'
 export * from './apiWatch'
 export * from './component'
