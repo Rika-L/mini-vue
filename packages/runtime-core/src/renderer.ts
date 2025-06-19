@@ -383,7 +383,10 @@ export function createRenderer(renderOptions) {
     // 1 先创建组件实例
     // 2 给实力的属性赋值
     // 3 创建一个effect
-    const instance = (vnode.component = createComponentInstance(vnode, parentComponent))
+    const instance = (vnode.component = createComponentInstance(
+      vnode,
+      parentComponent,
+    ))
 
     setupComponent(instance)
 
@@ -432,7 +435,8 @@ export function createRenderer(renderOptions) {
       return true // 有插槽直接走重新渲染
     }
 
-    if (prevProps === nextProps) { // props没有变化
+    if (prevProps === nextProps) {
+      // props没有变化
       return false
     }
 
@@ -486,10 +490,26 @@ export function createRenderer(renderOptions) {
         processFragment(n1, n2, container, anchor, parentComponent)
         break
       default:
-        if (shapeFlag & ShapeFlags.ELEMENT)
-          processElement(n1, n2, container, anchor, parentComponent) // 对元素处理
-        else if (shapeFlag & ShapeFlags.COMPONENT)
-          processComponent(n1, n2, container, anchor, parentComponent) // 对组件的处理 vue3 中函数式组件已经废弃了 没有性能节约
+        if (shapeFlag & ShapeFlags.ELEMENT) {
+          processElement(n1, n2, container, anchor, parentComponent)
+        } // 对元素处理
+        else if (shapeFlag & ShapeFlags.TELEPORT) {
+          type.process(n1, n2, container, anchor, parentComponent, {
+            mountChildren,
+            patchChildren,
+            move(vnode, container, anchor) {
+              // 此方法可以将组件或者dom元素移动到新的位置
+              hostInsert(
+                vnode.component ? vnode.component.subTree : vnode.el,
+                container,
+                anchor,
+              )
+            },
+          })
+        }
+        else if (shapeFlag & ShapeFlags.COMPONENT) {
+          processComponent(n1, n2, container, anchor, parentComponent)
+        } // 对组件的处理 vue3 中函数式组件已经废弃了 没有性能节约
 
         if (ref !== null) {
           setRef(ref, n2)
@@ -498,7 +518,10 @@ export function createRenderer(renderOptions) {
   }
 
   function setRef(rawRef, vnode) {
-    const value = vnode.shapeFlag & ShapeFlags.STATEFUL_COMPONENT ? vnode.component.exposed || vnode.component.proxy : vnode.el
+    const value
+      = vnode.shapeFlag & ShapeFlags.STATEFUL_COMPONENT
+        ? vnode.component.exposed || vnode.component.proxy
+        : vnode.el
     if (isRef(rawRef)) {
       rawRef.value = value
     }
@@ -523,6 +546,8 @@ export function createRenderer(renderOptions) {
       if (um) {
         invokeArray(um)
       }
+    }else if (shapeFlag & ShapeFlags.TELEPORT){
+      vnode.type.remove(vnode, unmountChildren)
     }
     else {
       hostRemove(vnode.el)

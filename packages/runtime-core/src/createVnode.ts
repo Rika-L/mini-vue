@@ -1,4 +1,5 @@
 import { isFunction, isObject, isString, ShapeFlags } from '@vue/shared'
+import { isTeleport } from './Teleport'
 
 export const Text = Symbol('Text')
 export const Fragment = Symbol('Fragment')
@@ -8,11 +9,13 @@ export function createVnode(type, props, children?) {
   // 如果是对象就是vue组件
   const shapeFlag = isString(type)
     ? ShapeFlags.ELEMENT
-    : isObject(type) // 状态组件
-      ? ShapeFlags.STATEFUL_COMPONENT
-      : isFunction(type) // 函数式组件
-        ? ShapeFlags.FUNCTIONAL_COMPONENT
-        : 0
+    : isTeleport(type) // 传送组件
+      ? ShapeFlags.TELEPORT
+      : isObject(type) // 状态组件
+        ? ShapeFlags.STATEFUL_COMPONENT
+        : isFunction(type) // 函数式组件
+          ? ShapeFlags.FUNCTIONAL_COMPONENT
+          : 0
   const vnode = {
     __v_isVnode: true,
     type,
