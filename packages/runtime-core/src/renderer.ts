@@ -320,6 +320,15 @@ export function createRenderer(renderOptions) {
     updateProps(instance, instance.props, next.props)
   }
 
+  function renderComponent(instance) {
+    const { render, vnode, proxy, props, attrs } = instance
+    if (vnode.shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
+      return render.call(proxy, proxy) // render()
+    }
+    else {
+      return vnode.type(attrs) // 函数式组件
+    }
+  }
   function setupRenderEffect(instance, container, anchor) {
     const { render } = instance
     // props attrs data 应该都可以被直接访问到
@@ -331,7 +340,7 @@ export function createRenderer(renderOptions) {
           invokeArray(bm)
         }
 
-        const subTree = render.call(instance.proxy, instance.proxy)
+        const subTree = renderComponent(instance)
         patch(null, subTree, container, anchor)
         instance.isMounted = true
         instance.subTree = subTree
@@ -355,7 +364,7 @@ export function createRenderer(renderOptions) {
           invokeArray(bu)
         }
 
-        const subTree = render.call(instance.proxy, instance.proxy)
+        const subTree = renderComponent(instance)
         patch(instance.subTree, subTree, container, anchor)
         instance.subTree = subTree
 
