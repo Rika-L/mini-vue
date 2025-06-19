@@ -1,4 +1,5 @@
 import {
+  getCurrentInstance,
   h,
   onBeforeMount,
   onBeforeUnmount,
@@ -57,5 +58,19 @@ describe('runtime-core: lifecycle', () => {
     }
     render(h(VueComponent), container)
     render(null, container)
+  })
+
+  it('should support getCurrentInstance', () => {
+    const container = document.createElement('div')
+    const VueComponent = {
+      setup() {
+        onMounted(() => {
+          expect(getCurrentInstance()).toBeTruthy()
+        })
+        return () => h('div', 'hello')
+      },
+    }
+    render(h(VueComponent), container)
+    expect(getCurrentInstance()).toBeNull()
   })
 })

@@ -49,7 +49,7 @@ export function triggerRefValue(ref) {
 }
 
 export function isRef(value) {
-  return !!value.__v_isRef
+  return value && !!value.__v_isRef
 }
 
 export function unRef(ref) {

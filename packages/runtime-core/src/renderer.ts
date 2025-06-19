@@ -1,5 +1,5 @@
 /* eslint-disable unused-imports/no-unused-vars */
-import { ReactiveEffect } from '@vue/reactivity'
+import { isRef, ReactiveEffect } from '@vue/reactivity'
 import { ShapeFlags } from '@vue/shared'
 import { invokeArray } from './apiLifecycle'
 import { createComponentInstance, setupComponent } from './component'
@@ -469,7 +469,7 @@ export function createRenderer(renderOptions) {
       // 直接移除老dom元素
     }
 
-    const { type, shapeFlag } = n2
+    const { type, shapeFlag, ref } = n2
     switch (type) {
       case Text:
         processText(n1, n2, container)
@@ -482,6 +482,17 @@ export function createRenderer(renderOptions) {
           processElement(n1, n2, container, anchor) // 对元素处理
         else if (shapeFlag & ShapeFlags.COMPONENT)
           processComponent(n1, n2, container, anchor) // 对组件的处理 vue3 中函数式组件已经废弃了 没有性能节约
+
+        if (ref !== null) {
+          setRef(ref, n2)
+        }
+    }
+  }
+
+  function setRef(rawRef, vnode) {
+    const value = vnode.shapeFlag & ShapeFlags.STATEFUL_COMPONENT ? vnode.component.exposed || vnode.component.proxy : vnode.el
+    if (isRef(rawRef)) {
+      rawRef.value = value
     }
   }
 
