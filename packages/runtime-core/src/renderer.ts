@@ -1,5 +1,6 @@
 /* eslint-disable unused-imports/no-unused-vars */
 import { isRef, ReactiveEffect } from '@vue/reactivity'
+import { isKeepAlive } from '@vue/runtime-dom'
 import { ShapeFlags } from '@vue/shared'
 import { invokeArray } from './apiLifecycle'
 import { createComponentInstance, setupComponent } from './component'
@@ -92,14 +93,14 @@ export function createRenderer(renderOptions) {
     }
   }
 
-  const unmountChildren = (children) => {
+  const unmountChildren = (children, parentComponent) => {
     for (let i = 0; i < children.length; i++) {
-      unmount(children[i])
+      unmount(children[i], parentComponent)
     }
   }
 
   // vue3中分为两种diff 全量diff（递归diff） 和 靶向更新 （基于模板编译）
-  const patchKeyedChildren = (c1, c2, el) => {
+  const patchKeyedChildren = (c1, c2, el, parentComponent) => {
     // 比较两个儿子的差异来更新el
     // [a,b,c,e,f,d]
     // [a,b,d,q,f,d]
@@ -174,7 +175,7 @@ export function createRenderer(renderOptions) {
       if (i <= e1) {
         // remove
         while (i <= e1) {
-          unmount(c1[i])
+          unmount(c1[i], parentComponent)
           i++
         }
       }
@@ -203,7 +204,7 @@ export function createRenderer(renderOptions) {
         if (!newIndex) {
           // 如果新的里面找不到
           // 删掉老的
-          unmount(vnode)
+          unmount(vnode, parentComponent)
         }
         else {
           // 找到了
@@ -255,7 +256,7 @@ export function createRenderer(renderOptions) {
     if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
       if (prevShapeFlag & ShapeFlags.ARRAY_CHILDREN) {
         // 新的是文本 老的是数组 移除老的
-        unmountChildren(c1)
+        unmountChildren(c1, parentComponent)
       }
       if (c1 !== c2) {
         hostSetElementText(el, c2)
@@ -265,10 +266,10 @@ export function createRenderer(renderOptions) {
       if (prevShapeFlag & ShapeFlags.ARRAY_CHILDREN) {
         if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
           // 全量diff 算法 两个数组比对
-          patchKeyedChildren(c1, c2, el)
+          patchKeyedChildren(c1, c2, el, parentComponent)
         }
         else {
-          unmountChildren(c1)
+          unmountChildren(c1, parentComponent)
         }
       }
       else {
@@ -323,7 +324,7 @@ export function createRenderer(renderOptions) {
     instance.vnode = next
     // instance.props
 
-    updateProps(instance, instance.props, next.props)
+    updateProps(instance, instance.props, next.props || {})
 
     // 组件更新的时候需要更新插槽
     Object.assign(instance.slots, next.children)
@@ -397,6 +398,16 @@ export function createRenderer(renderOptions) {
       parentComponent,
     ))
 
+    if (isKeepAlive(vnode)) {
+      instance.ctx.renderer = {
+        createElement: hostCreateElement, // 内部需要创建一个div来缓存dom
+        move(vnode, container, anchor) { // 需要把之前渲染的dom放入容器中
+          hostInsert(vnode.component.subTree.el, container)
+        },
+        unmount, // 如果组件切换需要将在容器中的元素移除
+      }
+    }
+
     setupComponent(instance)
 
     setupRenderEffect(instance, container, anchor, parentComponent)
@@ -450,7 +461,7 @@ export function createRenderer(renderOptions) {
     }
 
     // 如果属性不一致则更新
-    return hasPropsChange(prevProps, nextProps)
+    return hasPropsChange(prevProps, nextProps || {})
   }
 
   const updateComponent = (n1, n2) => {
@@ -469,7 +480,13 @@ export function createRenderer(renderOptions) {
 
   const processComponent = (n1, n2, container, anchor, parentComponent) => {
     if (n1 === null) {
-      mountComponent(n2, container, anchor, parentComponent)
+      if (n2.shapeFlag & ShapeFlags.COMPONENT_KEPT_ALIVE) {
+        // 需要走KeepAlive中的激活方法
+        parentComponent.ctx.activate(n2, container, anchor)
+      }
+      else {
+        mountComponent(n2, container, anchor, parentComponent)
+      }
     }
     else {
       // 组件的更新
@@ -485,7 +502,7 @@ export function createRenderer(renderOptions) {
     // 不是相同节点
     if (n1 && !isSameVnode(n1, n2)) {
       // 删掉n1换n2
-      unmount(n1)
+      unmount(n1, parentComponent)
       n1 = null // 就会执行n2的初始化
       // 直接移除老dom元素
     }
@@ -536,13 +553,18 @@ export function createRenderer(renderOptions) {
     }
   }
 
-  const unmount = (vnode) => {
+  const unmount = (vnode, parentComponent) => {
     const { shapeFlag, component: instance, transition, el } = vnode
     // 卸载组件
-    const performRemove = () => hostRemove(vnode.el)
-
-    if (vnode.type === Fragment) {
-      unmountChildren(vnode.children)
+    const performRemove = () => {
+      hostRemove(vnode.el)
+    }
+    if (shapeFlag & ShapeFlags.COMPONENT_SHOULD_KEEP_ALIVE) {
+      // 需要找keepAlive走失活逻辑
+      parentComponent.ctx.deactivate(vnode)
+    }
+    else if (vnode.type === Fragment) {
+      unmountChildren(vnode.children, parentComponent)
     }
     else if (shapeFlag & ShapeFlags.COMPONENT) {
       const { bum, um } = instance
@@ -551,7 +573,7 @@ export function createRenderer(renderOptions) {
         invokeArray(bum)
       }
 
-      unmount(vnode.component.subTree)
+      unmount(vnode.component.subTree, parentComponent)
 
       if (um) {
         invokeArray(um)
@@ -575,7 +597,7 @@ export function createRenderer(renderOptions) {
     if (vnode == null) {
       // 移除当前容器的dom元素
       if (container._vnode) {
-        unmount(container._vnode)
+        unmount(container._vnode, null)
       }
     }
     else {

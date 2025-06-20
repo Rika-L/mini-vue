@@ -18,6 +18,7 @@ export function createComponentInstance(vnode, parentComponent) {
     setupState: {},
     exposed: null,
     parent: parentComponent,
+    ctx: {} as any, // 如果是KeepAlive组件 就将dom api放入到这个属性上
     // p1 => p2 => p3
     provides: parentComponent ? parentComponent.provides : Object.create(null), // 储存依赖注入的值
   }

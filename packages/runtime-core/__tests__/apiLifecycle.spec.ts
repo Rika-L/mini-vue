@@ -6,7 +6,7 @@ import {
   onBeforeUpdate,
   onMounted,
   onUnmounted,
-  onUpdate,
+  onUpdated,
   ref,
   render,
   Text,
@@ -34,7 +34,7 @@ describe('runtime-core: lifecycle', () => {
     const VueComponent = {
       setup() {
         onBeforeUpdate(() => expect(container.innerHTML).toBe('1'))
-        onUpdate(() => expect(container.innerHTML).toBe('2'))
+        onUpdated(() => expect(container.innerHTML).toBe('2'))
         const count = ref(1)
         setTimeout(() => count.value++)
         return () => h(Text, count.value)

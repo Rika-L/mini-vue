@@ -34,7 +34,7 @@ function createHook(type) {
 export const onBeforeMount = createHook(LifeCycles.BEFORE_MOUNT)
 export const onMounted = createHook(LifeCycles.MOUNTED)
 export const onBeforeUpdate = createHook(LifeCycles.BEFORE_UPDATE)
-export const onUpdate = createHook(LifeCycles.UPDATE)
+export const onUpdated = createHook(LifeCycles.UPDATE)
 export const onBeforeUnmount = createHook(LifeCycles.BEFORE_UNMOUNT)
 export const onUnmounted = createHook(LifeCycles.UNMOUNTED)
 
