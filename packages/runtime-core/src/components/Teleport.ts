@@ -10,7 +10,7 @@ export const Teleport = {
       unmountChildren(children)
     }
   },
-  process: (n1, n2, container, anchor, parentComponent, internals) => {
+  process: (n1, n2, _container, anchor, parentComponent, internals) => {
     const { mountChildren, patchChildren, move } = internals
 
     // 看n1 n2 的关系

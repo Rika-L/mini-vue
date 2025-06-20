@@ -44,7 +44,7 @@ export function createRenderer(renderOptions) {
   }
 
   const mountElement = (vnode, container, anchor, parentComponent) => {
-    const { type, children, props, shapeFlag } = vnode
+    const { type, children, props, shapeFlag, transition } = vnode
     // 第一次渲染的时候让虚拟节点和真实dom创建管理
     // 第二次渲染新的vnode 可以和上一次的vnode做比对 之后更新el元素可以后续再复用这个dom
     const el = (vnode.el = hostCreateElement(type))
@@ -60,7 +60,13 @@ export function createRenderer(renderOptions) {
     else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN)
       mountChildren(children, el, anchor, parentComponent)
 
+    if (transition)
+      transition.beforeEnter(el)
+
     hostInsert(el, container, anchor)
+
+    if (transition)
+      transition.enter(el)
   }
 
   const processElement = (n1, n2, container, anchor, parentComponent) => {
@@ -318,15 +324,18 @@ export function createRenderer(renderOptions) {
     // instance.props
 
     updateProps(instance, instance.props, next.props)
+
+    // 组件更新的时候需要更新插槽
+    Object.assign(instance.slots, next.children)
   }
 
   function renderComponent(instance) {
-    const { render, vnode, proxy, props, attrs } = instance
+    const { render, vnode, proxy, props, attrs, slots } = instance
     if (vnode.shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
       return render.call(proxy, proxy) // render()
     }
     else {
-      return vnode.type(attrs) // 函数式组件
+      return vnode.type(attrs, { slots }) // 函数式组件
     }
   }
   function setupRenderEffect(instance, container, anchor, parentComponent) {
@@ -528,8 +537,9 @@ export function createRenderer(renderOptions) {
   }
 
   const unmount = (vnode) => {
-    const { shapeFlag, component: instance } = vnode
+    const { shapeFlag, component: instance, transition, el } = vnode
     // 卸载组件
+    const performRemove = () => hostRemove(vnode.el)
 
     if (vnode.type === Fragment) {
       unmountChildren(vnode.children)
@@ -546,11 +556,17 @@ export function createRenderer(renderOptions) {
       if (um) {
         invokeArray(um)
       }
-    }else if (shapeFlag & ShapeFlags.TELEPORT){
+    }
+    else if (shapeFlag & ShapeFlags.TELEPORT) {
       vnode.type.remove(vnode, unmountChildren)
     }
     else {
-      hostRemove(vnode.el)
+      if (transition) {
+        transition.leave(el, performRemove)
+      }
+      else {
+        performRemove()
+      }
     }
   }
 
