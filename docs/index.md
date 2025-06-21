@@ -4,8 +4,8 @@ layout: home
 
 hero:
   name: "mini-vue"
-  text: "A VitePress Site"
-  tagline: My great project tagline
+  text: "实现最简的Vue3模型"
+  tagline: 基于Vue3.4
   actions:
     - theme: brand
       text: Markdown Examples
@@ -22,4 +22,3 @@ features:
   - title: Feature C
     details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
 ---
-

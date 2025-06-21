@@ -5,11 +5,12 @@ export default defineConfig({
   title: 'mini-vue',
   description: '基于Vue3.4实现最简的Vue3模型',
   base: '/mini-vue/',
+  lastUpdated: true,
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: 'Home', link: '/' },
-      { text: 'Examples', link: '/markdown-examples' },
+      { text: 'Reactivity', link: '/effect' },
     ],
 
     sidebar: [

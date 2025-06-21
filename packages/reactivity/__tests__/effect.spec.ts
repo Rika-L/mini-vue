@@ -90,23 +90,37 @@ describe('effect', () => {
     expect(dummy).toBe(2)
   })
 
-  //  it("stop", () => {
-  //   let dummy;
-  //   const obj = reactive({ prop: 1 });
-  //   const runner = effect(() => {
-  //     dummy = obj.prop;
-  //   });
-  //   obj.prop = 2;
-  //   expect(dummy).toBe(2);
-  //   stop(runner);
-  //   // obj.prop = 3
-  //   obj.prop++;
-  //   expect(dummy).toBe(2);
+  it('stop', () => {
+    let dummy
+    const obj = reactive({ prop: 1 })
+    const runner = effect(() => {
+      dummy = obj.prop
+    })
+    obj.prop = 2
+    expect(dummy).toBe(2)
+    runner.effect.stop(runner)
+    // obj.prop = 3
+    obj.prop++
+    expect(dummy).toBe(2)
 
-  //   // stopped effect should still be manually callable
-  //   runner();
-  //   expect(dummy).toBe(3);
-  // });
+    // stopped effect should still be manually callable
+    runner()
+    expect(dummy).toBe(3)
+  })
+
+  it(' should support scheduler', () => {
+    let dummy
+    const counter = reactive({ num: 0 })
+    const runner = effect(() => (dummy = counter.num), {
+      scheduler: () => {
+        runner()
+      },
+    })
+
+    expect(dummy).toBe(0)
+    counter.num = 7
+    expect(dummy).toBe(7)
+  })
 
   // it("events: onStop", () => {
   //   const onStop = vi.fn();
