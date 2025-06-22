@@ -10,20 +10,21 @@ export default defineConfig({
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: 'Home', link: '/' },
-      { text: 'Reactivity', link: '/effect' },
+      { text: 'Reactivity', link: '/响应式原理' },
     ],
 
     sidebar: [
       {
         text: 'Reactivity',
         items: [
-          { text: 'effect', link: '/effect' },
+          { text: '响应式原理', link: '/响应式原理' },
+          { text: 'ref', link: '/ref' },
         ],
       },
     ],
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/vuejs/vitepress' },
+      { icon: 'github', link: 'https://github.com/Rika-L/mini-vue' },
     ],
   },
 })

@@ -8,8 +8,8 @@ hero:
   tagline: 基于Vue3.4
   actions:
     - theme: brand
-      text: Markdown Examples
-      link: /markdown-examples
+      text: Reactivity
+      link: /响应式原理
     - theme: alt
       text: API Examples
       link: /api-examples
