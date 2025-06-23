@@ -19,6 +19,7 @@ export default defineConfig({
         items: [
           { text: '响应式原理', link: '/响应式原理' },
           { text: 'ref', link: '/ref' },
+          { text: 'computed', link: '/computed' },
         ],
       },
     ],
