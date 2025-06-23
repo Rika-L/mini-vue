@@ -73,7 +73,11 @@ export function setupBlock(vnode) {
 }
 // block 有收集虚拟节点的能力
 export function createElementBlock(type, props, children, patchFlag?) {
-  return setupBlock(createVnode(type, props, children, patchFlag))
+  const vnode = createVnode(type, props, children, patchFlag)
+  // if (currentBlock) {
+  //   currentBlock.push(vnode)
+  // }
+  return vnode
 }
 
 export function toDisplayString(value) {
