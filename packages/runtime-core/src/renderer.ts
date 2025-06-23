@@ -1,7 +1,7 @@
 /* eslint-disable unused-imports/no-unused-vars */
 import { isRef, ReactiveEffect } from '@vue/reactivity'
 import { isKeepAlive } from '@vue/runtime-dom'
-import { ShapeFlags } from '@vue/shared'
+import { PatchFlags, ShapeFlags } from '@vue/shared'
 import { invokeArray } from './apiLifecycle'
 import { createComponentInstance, setupComponent } from './component'
 import { createVnode, Fragment, isSameVnode, Text } from './createVnode'
@@ -284,6 +284,12 @@ export function createRenderer(renderOptions) {
     }
   }
 
+  const patchBlockChildren = (n1, n2, el, anchor, parentComponent) => {
+    for (let i = 0; i < n2.dynamicChildren.length; i++) {
+      patch(n1.dynamicChildren[i], n2.dynamicChildren[i], el, anchor, parentComponent)
+    }
+  }
+
   const patchElement = (n1, n2, _container, anchor, parentComponent) => {
     // 1.比较元素的差异 肯定需要复用dom元素
     // 2.比较属性的差异
@@ -291,9 +297,39 @@ export function createRenderer(renderOptions) {
 
     const oldProps = n1.props || {}
     const newProps = n2.props || {}
-    patchProps(oldProps, newProps, el)
 
-    patchChildren(n1, n2, el, anchor, parentComponent)
+    // 在比较元素的时候 针对某个属性去比较
+    const { patchFlag, dynamicChildren } = n2
+
+    if (patchFlag) {
+      if (patchFlag & PatchFlags.CLASS) {
+        if (oldProps.class !== newProps.class) {
+          hostPatchProp(el, newProps.class, oldProps.class)
+        }
+      }
+
+      if (patchFlag & PatchFlags.STYLE) {
+        hostPatchProp(el, newProps.style, oldProps.style)
+      }
+    }
+    else {
+      patchProps(oldProps, newProps, el)
+    }
+    if (patchFlag & PatchFlags.TEXT) {
+      // 只要儿子是动态的 只比较儿子
+      if (n1.children !== n2.children) {
+        hostSetElementText(el, n2.children)
+      }
+    }
+
+    if (dynamicChildren) {
+      // 线性比对
+      patchBlockChildren(n1, n2, el, anchor, parentComponent)
+    }
+    else {
+      // 全量diff
+      patchChildren(n1, n2, el, anchor, parentComponent)
+    }
   }
 
   const processText = (n1, n2, container) => {

@@ -10,6 +10,7 @@ export function isString(value) {
   return typeof value === 'string'
 }
 
+export * from './patchFlags'
 export * from './shapeFlags'
 
 const hasOwnProperty = Object.prototype.hasOwnProperty
