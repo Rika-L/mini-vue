@@ -22,6 +22,12 @@ export default defineConfig({
           { text: 'computed', link: '/computed' },
         ],
       },
+      {
+        text: 'runtime-dom',
+        items: [
+          { text: 'runtime-dom', link: '/runtime-dom' },
+        ],
+      },
     ],
 
     socialLinks: [

@@ -7,6 +7,10 @@ export default defineConfig({
     environmentMatchGlobs: [
       ['packages/{vue,vue-compat,runtime-dom,runtime-core}/**', 'jsdom'],
     ],
+
+    coverage: {
+      enabled: true,
+    },
   },
   resolve: {
     alias: [
