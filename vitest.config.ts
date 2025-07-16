@@ -9,7 +9,8 @@ export default defineConfig({
     ],
 
     coverage: {
-      enabled: true,
+      enabled: false,
+      provider: 'v8',
     },
   },
   resolve: {
