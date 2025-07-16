@@ -26,6 +26,7 @@ export default defineConfig({
         text: 'runtime-dom',
         items: [
           { text: 'runtime-dom', link: '/runtime-dom' },
+          { text: 'watch', link: '/watch' },
         ],
       },
     ],
