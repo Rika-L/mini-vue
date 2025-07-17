@@ -9,6 +9,62 @@ describe('compiler-core: parse', () => {
         {
           type: NodeTypes.TEXT,
           content: '666',
+          loc: {
+            start: {
+              column: 1,
+              line: 1,
+              offset: 0,
+            },
+            end: {
+              column: 4,
+              line: 1,
+              offset: 3,
+            },
+            source: '666',
+          },
+        },
+      ],
+    })
+  })
+
+  it('can resolve interpolation', () => {
+    expect(parse('{{ name }}')).toStrictEqual({
+      type: NodeTypes.ROOT,
+      children: [
+        {
+          type: NodeTypes.INTERPOLATION,
+          content: {
+            type: NodeTypes.SIMPLE_EXPRESSION,
+            isStatic: false,
+            isConstant: false,
+            content: 'name',
+            loc: {
+              start: {
+                column: 4,
+                line: 1,
+                offset: 3,
+              },
+              end: {
+                column: 8,
+                line: 1,
+                offset: 7,
+              },
+              source: 'name',
+            },
+          },
+          loc: {
+            start: {
+              column: 1,
+              line: 1,
+              offset: 0,
+            },
+            end: {
+              column: 11,
+              line: 1,
+              offset: 10,
+            },
+            source: '{{ name }}',
+          },
         },
       ],
     })
@@ -21,7 +77,21 @@ describe('compiler-core: parse', () => {
         {
           type: NodeTypes.ELEMENT,
           tag: 'div',
+          isSelfClosing: false,
           children: [],
+          loc: {
+            start: {
+              column: 1,
+              line: 1,
+              offset: 0,
+            },
+            end: {
+              column: 12,
+              line: 1,
+              offset: 11,
+            },
+            source: '<div></div>',
+          },
         },
       ],
     })

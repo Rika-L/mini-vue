@@ -12,6 +12,10 @@ export default defineConfig({
       ),
       '@vue/shared': path.resolve(__dirname, './packages/shared/src'),
       '@vue/reactivity': path.resolve(__dirname, './packages/reactivity/src'),
+      '@vue/compiler-core': path.resolve(
+        __dirname,
+        './packages/compiler-core/src',
+      ),
     },
   },
   output: [
