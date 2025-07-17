@@ -1,3 +1,5 @@
+import { CREATE_TEST_VNODE } from './runtimeHelper';
+
 export enum NodeTypes {
   ROOT,
   ELEMENT,
@@ -30,4 +32,14 @@ export enum NodeTypes {
   JS_ASSIGNMENT_EXPRESSION,
   JS_SEQUENCE_EXPRESSION,
   JS_RETURN_STATEMENT,
+}
+
+export function createCallExpression(context,args){
+  const name = context.helper(CREATE_TEST_VNODE)
+
+  return { // createTextVnode
+    type: NodeTypes.JS_CALL_EXPRESSION, // JS调用表达式
+    arguments: args, // 参数
+    callee: name
+  }
 }
