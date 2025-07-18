@@ -1,15 +1,30 @@
 import { PatchFlags } from '@vue/shared'
-import { createCallExpression, NodeTypes } from './ast'
+import { createCallExpression, createObjectExpression, createVnodeCall, NodeTypes } from './ast'
 import { parse } from './parser'
-import { TO_DISPLAY_STRING } from './runtimeHelper'
+import { CREATE_ELEMENT_BLOCK, CREATE_ELEMENT_VNODE, Fragment, OPEN_BLOCK, TO_DISPLAY_STRING } from './runtimeHelper'
 
 // dom 的遍历方式 先序 后续
 function transformElement(node, context) {
   if (NodeTypes.ELEMENT === node.type) {
-    console.log('处理元素')
-
     return function () {
-      console.log('元素处理后触发')
+      const { tag, props, children } = node
+      const vnodeTag = tag // createElementVNode(div)
+      const properties = []
+      for (let i = 0; i < props.length; i++) {
+        properties.push({ key: props[i].name, value: props[i].value })
+      }
+      const propsExpression
+        = properties.length > 0 ? createObjectExpression(properties) : null
+
+      let vnodeChildren = null
+      if (children.length === 1) {
+        vnodeChildren = children[0]
+      }
+      else if (children.length > 1) {
+        vnodeChildren = children
+      }
+
+      node.codegenNode = createVnodeCall(context, vnodeTag, propsExpression, vnodeChildren)
     }
   }
 }
@@ -54,28 +69,27 @@ function transformText(node, context) {
       }
       // 需要看一下文本节点是不是只有一个 只有一个不需要createTextVnode
 
-      if(!hasText || children.length === 1) {
+      if (!hasText || children.length === 1) {
         return
       }
 
       // createTextVnode
 
-      for(let i = 0; i < children.length; i++){
+      for (let i = 0; i < children.length; i++) {
         const child = children[i]
-        if(isText(child) || child.type === NodeTypes.COMPOUND_EXPRESSION) {
+        if (isText(child) || child.type === NodeTypes.COMPOUND_EXPRESSION) {
           const args = []
           args.push(child)
 
-          if(child.type === NodeTypes.TEXT) {
+          if (child.type === NodeTypes.TEXT) {
             args.push(PatchFlags.TEXT)
           }
 
           children[i] = {
             type: NodeTypes.TEXT_CALL, // createTextVnode
             content: child,
-            codegenNode: createCallExpression(context,args)// createCallExpression
+            codegenNode: createCallExpression(context, args), // createCallExpression
           }
-          
         }
       }
     }
@@ -99,6 +113,20 @@ function createTransformContext(root) {
       context.helpers.set(name, count + 1)
       return name
     },
+    removeHelper(name) {
+      const count = context.helpers.get(name)
+
+      if (count) {
+        const c = count - 1
+
+        if (!c) {
+          context.helpers.delete(name)
+        }
+        else {
+          context.helpers.set(name, c)
+        }
+      }
+    },
   }
   return context
 }
@@ -121,7 +149,7 @@ function traverseNode(node, context) {
         traverseNode(node.children[i], context)
       }
       break
-      // 对表达式进行处理
+    // 对表达式进行处理
     case NodeTypes.INTERPOLATION:
       context.helper(TO_DISPLAY_STRING)
       break
@@ -138,11 +166,38 @@ function traverseNode(node, context) {
   }
 }
 
+function createRootCodegenNode(ast, context) {
+  const { children } = ast
+  if (children.length === 1) {
+    const child = children[0]
+    if (child.type === NodeTypes.ELEMENT) {
+      ast.codegenNode = child.codegenNode
+      context.removeHelper(CREATE_ELEMENT_VNODE)
+      context.helper(CREATE_ELEMENT_BLOCK)
+      context.helper(OPEN_BLOCK)
+      ast.codegenNode.isBlock = true // 需要创建一个块
+    }
+    else {
+      ast.codegenNode = child
+    }
+  }
+  else {
+    ast.codegenNode = createVnodeCall(context, context.helper(Fragment), undefined, children)
+
+    context.helper(CREATE_ELEMENT_BLOCK)
+    context.helper(OPEN_BLOCK)
+  }
+}
+
 function transform(ast) {
   // 对语法树进行遍历
   const context = createTransformContext(ast)
 
   traverseNode(ast, context)
+
+  // 对根节点做处理 1 文本 2 一个元素 3 多个元素
+
+  createRootCodegenNode(ast, context)
 
   ast.helpers = [...context.helpers.keys()]
 }
@@ -150,7 +205,6 @@ function transform(ast) {
 function compile(template) {
   const ast = parse(template)
 
-  console.log(ast)
   // 代码转化
   transform(ast)
 }
