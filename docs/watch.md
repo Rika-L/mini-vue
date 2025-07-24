@@ -1,8 +1,6 @@
 # watch
 
-## watch
-
-### 用法
+## 用法
 
 `watch` 接受三个参数
 * `source` 可以是一个`getter`函数, 可以是一个`ref`也可以是一个响应式对象
@@ -18,7 +16,7 @@ watch(count, (newValue, oldValue) => {
 count.value++ // 1 0
 ```
 
-### 实现原理
+## 实现原理
 
 基于`doWatch`方法实现, 首先对`source`进行判断,如果`source`是一个对象,则需要递归这个对象,产生一个可以给`ReactiveEffect`使用的`getter`, 如果`source`是一个函数, 则直接使用这个函数, 如果`source`是一个`ref`对象, 则使用`ref.value`作为`getter`
 
@@ -31,17 +29,17 @@ count.value++ // 1 0
 - Options
   - `deep` 是否深度监视, 原理: 如果传入`false` 递归遍历对象的时候 只会遍历一层 实现浅层监视
   - `immediate` 是否立即执行一次回调函数 默认为`false` 原理: 执行`doWatch` 时 如果传入选项则会立即执行
-  - 
+  -
 
-## watchEffect
+# watchEffect
 
-### 用法
+## 用法
 
 `watchEffect` 接受两个参数
 * `effect` 回调函数, 当`effect`内的响应式对象变化时, 会重新执行`effect`回调函数
 * `options` 配置项
 
-### 实现原理
+## 实现原理
 
 也基于`doWatch`实现 不过传入的`getter`是`effect`本身 `callback` 传入的是null
 

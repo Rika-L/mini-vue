@@ -26,6 +26,12 @@ export default defineConfig({
         text: 'runtime-dom',
         items: [
           { text: 'runtime-dom', link: '/runtime-dom' },
+        ],
+      },
+      {
+        text: 'runtime-core',
+        items: [
+          { text: 'runtime-core', link: '/runtime-core' },
           { text: 'watch', link: '/watch' },
         ],
       },
