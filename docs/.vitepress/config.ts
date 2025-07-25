@@ -1,7 +1,8 @@
 import { defineConfig } from 'vitepress'
+import { withSidebar } from 'vitepress-sidebar'
 
 // https://vitepress.dev/reference/site-config
-export default defineConfig({
+const vitepressOption = defineConfig({
   title: 'mini-vue',
   description: '基于Vue3.4实现最简的Vue3模型',
   base: '/mini-vue/',
@@ -10,35 +11,19 @@ export default defineConfig({
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: 'Home', link: '/' },
-      { text: 'Reactivity', link: '/响应式原理' },
+      { text: 'Reactivity', link: '/1-reactivity/1-响应式原理' },
     ],
-
-    sidebar: [
-      {
-        text: 'Reactivity',
-        items: [
-          { text: '响应式原理', link: '/响应式原理' },
-          { text: 'ref', link: '/ref' },
-          { text: 'computed', link: '/computed' },
-        ],
-      },
-      {
-        text: 'runtime-dom',
-        items: [
-          { text: 'runtime-dom', link: '/runtime-dom' },
-        ],
-      },
-      {
-        text: 'runtime-core',
-        items: [
-          { text: 'runtime-core', link: '/runtime-core' },
-          { text: 'watch', link: '/watch' },
-        ],
-      },
-    ],
-
     socialLinks: [
       { icon: 'github', link: 'https://github.com/Rika-L/mini-vue' },
     ],
   },
 })
+
+const vitePressSidebarOptions = {
+  // VitePress Sidebar's options here...
+  documentRootPath: '/docs',
+  collapsed: false,
+  debugPrint: true,
+}
+
+export default withSidebar(vitepressOption, vitePressSidebarOptions)

@@ -9,7 +9,7 @@ hero:
   actions:
     - theme: brand
       text: Reactivity
-      link: /响应式原理
+      link: /1-reactivity/1-响应式原理
     - theme: alt
       text: API Examples
       link: /api-examples
