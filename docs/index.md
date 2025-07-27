@@ -15,10 +15,10 @@ hero:
       link: /api-examples
 
 features:
-  - title: Feature A
+  - title: mini-vue
     details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
-  - title: Feature B
+  - title: mini-vue-router
     details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
-  - title: Feature C
+  - title: mini-pinia
     details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
 ---
