@@ -7,6 +7,11 @@ const vitepressOption = defineConfig({
   description: '基于Vue3.4实现最简的Vue3模型',
   base: '/mini-vue/',
   lastUpdated: true,
+  markdown: {
+    image: {
+      lazyLoading: true, // 图片懒加载
+    },
+  },
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [

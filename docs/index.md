@@ -5,7 +5,7 @@ layout: home
 hero:
   name: "mini-vue"
   text: "实现最简的Vue3模型"
-  tagline: 基于Vue3.4
+  tagline: 面试通关文档
   actions:
     - theme: brand
       text: Reactivity
