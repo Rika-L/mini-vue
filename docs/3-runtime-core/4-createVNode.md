@@ -10,7 +10,7 @@
 * props
 * children?
 
-返回一个虚拟节点，会根据type的类型决定虚拟节点上的`patchFlag`
+返回一个虚拟节点，会根据type的类型决定虚拟节点上的`shapeFlag`
 
 虚拟节点的结构大致如下所示
 
@@ -33,3 +33,4 @@
 
 会根据`type`的类型确定 shapeFlag 的值
 
+[shapeFlag原理](/3-runtime-core/5-shapeFlag原理)
