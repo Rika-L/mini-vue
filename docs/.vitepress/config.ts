@@ -12,6 +12,7 @@ const vitepressOption = defineConfig({
       lazyLoading: true, // 图片懒加载
     },
   },
+  ignoreDeadLinks: true, // 忽略死链
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [
