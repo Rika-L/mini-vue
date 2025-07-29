@@ -6,6 +6,9 @@ const vitepressOption = defineConfig({
   title: 'mini-vue',
   description: '基于Vue3.4实现最简的Vue3模型',
   base: '/mini-vue/',
+  sitemap: {
+    hostname: 'https://rika-l.github.io/mini-vue/',
+  },
   lastUpdated: true,
   markdown: {
     image: {
