@@ -17,6 +17,12 @@ const vitepressOption = defineConfig({
   },
   ignoreDeadLinks: true, // 忽略死链
   themeConfig: {
+    editLink: {
+      pattern: 'https://github.com/Rika-L/mini-vue/edit/main/docs/:path',
+    },
+    search: {
+      provider: 'local',
+    },
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: 'Home', link: '/' },
