@@ -32,8 +32,8 @@ features:
     link: /4-compiler-core/0-compiler-core介绍
     linkText: Learn more
   - title: mini-pinia
-    details: vue官方状态管理库pinia的简化实现(is working)
-    link: /4-compiler-core/0-compiler-core介绍
+    details: vue官方状态管理库pinia的简化实现
+    link: /5-mini-pinia/0-pinia介绍
     linkText: Learn more
   - title: mini-vue-router
     details: vue官方路由库vue-router的简化实现(is working)
