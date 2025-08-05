@@ -154,7 +154,3 @@ function createSetupStore(id, setup, pinia, isSetupStore) {
   return store
 }
 ```
-
-## 总结
-
-
