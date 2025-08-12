@@ -41,6 +41,6 @@ features:
     linkText: Learn more
   - title: 面试题整理
     details: 面试题整理，包含常见的vue面试题(is working)
-    link: /interview-questions/1-面试题整理
+    link: /7-prepare-for-interview/01-TDD(测试驱动开发)
     linkText: Learn more
 ---
