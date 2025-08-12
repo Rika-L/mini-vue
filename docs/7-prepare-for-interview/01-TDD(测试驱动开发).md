@@ -56,3 +56,8 @@ TDD 的好处包括：
 * **BDD（行为驱动开发）(Behavior Driven Development)**：BDD 是 TDD 的一种扩展，强调通过描述软件的行为来驱动开发。它使用自然语言编写测试用例，使得非技术人员也能理解测试内容。
 * **ATDD（验收测试驱动开发）(Acceptance Test Driven Development)**：ATDD 是在开发之前与客户或产品经理一起定义验收标准和测试用例，以确保开发的功能符合业务需求。ATDD 强调在开发前就明确需求和预期结果。
 * **DDD（领域驱动设计）(Design Driven Development)**：DDD 是一种软件设计方法，强调将复杂的业务逻辑分解为领域模型，并通过领域模型来驱动开发。DDD 强调与领域专家的合作，以确保软件设计能够准确反映业务需求。
+
+## 参考文献
+
+- [前端ing](https://www.yuque.com/u29297079/51-644/qewufmbr4m4ak99a)
+- [TDD 与 BDD 仅仅是语言描述上的区别么？](https://www.zhihu.com/question/20161970)
